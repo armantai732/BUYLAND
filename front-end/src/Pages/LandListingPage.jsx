@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Check,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Sample Property Data strictly aligned with the design image
 const INITIAL_PROPERTIES = [
@@ -165,6 +166,8 @@ export default function App() {
       return b.id - a.id; // Latest default
     });
   }, [selectedLocation, selectedTypes, maxPrice, sortBy]);
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] font-sans text-[#1a1c1e] antialiased">
@@ -435,6 +438,7 @@ export default function App() {
                       {/* Card Image Container */}
                       <div className="relative h-36 w-full overflow-hidden bg-gray-100 sm:h-48">
                         <img
+                          onClick={()=>navigate("/propertiesDetails")}
                           src={item.image}
                           alt={item.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
