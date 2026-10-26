@@ -235,7 +235,7 @@ export default function ExploreNearYou() {
             </MapContainer>
 
             {/* Search overlay */}
-            <div className="pointer-events-none absolute left-4 right-4 top-4 z-[500] sm:left-6 sm:right-auto sm:w-[350px]">
+            <div className="pointer-events-none absolute left-4 right-4 top-4 z-[40] sm:left-6 sm:right-auto sm:w-[350px]">
               <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-white/70 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-md">
                 <Search className="shrink-0 text-[#b99a5b]" size={20} />
 
@@ -298,7 +298,7 @@ export default function ExploreNearYou() {
             </div>
 
             {/* Selected city information */}
-            <div className="pointer-events-none absolute bottom-5 left-4 z-[500] max-w-[calc(100%-100px)] sm:bottom-6 sm:left-6">
+            <div className="pointer-events-none absolute bottom-5 left-4 z-[40] max-w-[calc(100%-100px)] sm:bottom-6 sm:left-6">
               <div className="rounded-2xl border border-white/70 bg-[#102729]/95 px-4 py-3 text-white shadow-xl backdrop-blur-md sm:px-5 sm:py-4">
                 <div className="mb-1 flex items-center gap-2 text-xs text-[#d9bd80]">
                   <MapPin size={14} />

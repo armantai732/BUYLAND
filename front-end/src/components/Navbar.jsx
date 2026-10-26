@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const navLinks = [
     { name: "Home", path: "/" },
@@ -66,13 +66,25 @@ export default function Navbar() {
                 {/* Desktop Navigation */}
                 <div className="hidden items-center gap-6 md:flex lg:gap-8">
                     {navLinks.map((link) => (
-                        <Link
+                        <NavLink
                             key={link.name}
                             to={link.path}
-                            className="text-[13px] font-medium text-white/90 transition-colors duration-200 hover:text-[#F5D58A] lg:text-sm"
+                            end={link.path === "/"}
+
+                            className={({ isActive }) =>
+                                `relative py-2 text-[13px] font-medium transition-colors duration-200 lg:text-sm
+    after:absolute after:-bottom-1 after:left-0 after:h-[2px]
+    after:bg-[#F5D58A] after:transition-all after:duration-300
+    after:ease-in-out after:content-['']
+    ${isActive
+                                    ? "text-[#F5D58A] after:w-full"
+                                    : "text-white/90 after:w-0 hover:text-[#F5D58A] hover:after:w-full"
+                                }`
+                            }
+
                         >
                             {link.name}
-                        </Link>
+                        </NavLink>
                     ))}
                 </div>
 
@@ -121,30 +133,42 @@ export default function Navbar() {
                 <div className="absolute left-0 top-full w-full border-t border-white/10 bg-[#15161b] px-5 py-5 shadow-2xl md:hidden">
                     <div className="flex flex-col gap-1">
                         {navLinks.map((link) => (
-                            <a
+                            <NavLink
                                 key={link.name}
-                                href={link.href}
+                                to={link.path}
+                                end={link.path === "/"}
                                 onClick={() => setMenuOpen(false)}
-                                className="rounded-lg px-4 py-3 text-sm text-white/90 transition hover:bg-white/5 hover:text-[#F5D58A]"
+
+                                className={({ isActive }) =>
+                                    `relative py-2 text-[13px] font-medium transition-colors duration-200 lg:text-sm
+    after:absolute after:-bottom-1 after:left-0 after:h-[2px]
+    after:bg-[#F5D58A] after:transition-all after:duration-300
+    after:ease-in-out after:content-['']
+    ${isActive
+                                        ? "text-[#F5D58A] after:w-full"
+                                        : "text-white/90 after:w-0 hover:text-[#F5D58A] hover:after:w-full"
+                                    }`
+                                }
+
                             >
                                 {link.name}
-                            </a>
+                            </NavLink>
                         ))}
 
                         <div className="mt-3 flex gap-3 border-t border-white/10 pt-4">
-                            <a
-                                href="#login"
+                            <Link
+                                to={"/login"}
                                 className="flex-1 rounded-full border border-white/10 bg-[#202127] py-3 text-center text-sm font-semibold"
                             >
                                 Login
-                            </a>
+                            </Link>
 
-                            <a
-                                href="#signup"
+                            <Link
+                                to={"/signup"}
                                 className="flex-1 rounded-full bg-gradient-to-b from-[#FFE5A0] to-[#EBC76D] py-3 text-center text-sm font-bold text-[#30230C]"
                             >
                                 Sign Up
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
