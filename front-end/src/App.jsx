@@ -11,13 +11,24 @@ import LoginPage from "./Pages/LoginPage";
 import SignupPage from "./Pages/SignupPage";
 import Footer from "./components/Footer";
 import PropertyDetail from "./Pages/PropertyDetail";
+import { useEffect } from "react";
+import SellProperty from "./Pages/SellProperty";
+import UserDashboard from "./Pages/UserDashboard";
 
 export default function App() {
   const location = useLocation();
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    })
+  }, [location.pathname]);
+
   const hide =
     location.pathname === "/login" ||
     location.pathname === "/signup";
+
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#101112]">
@@ -33,6 +44,8 @@ export default function App() {
           <Route path="/services" element={<ServicesSection />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/sale" element={<SellProperty />} />
+          <Route path="/profile" element={<UserDashboard />}></Route>
         </Routes>
       </main>
 

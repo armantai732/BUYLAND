@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginData } from "../api/api";
+import { loginWithGoogleToken } from "../api/googleAuth";
+import { signInWithPopup } from "firebase/auth";
+import { firebaseAuth, googleProvider } from "../firebase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +13,7 @@ export default function LoginPage() {
     password: "",
     rememberMe: false,
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -18,17 +23,79 @@ export default function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data Submitted:", formData);
+
+
+    try {
+      const payload = {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password
+      };
+
+      const response = await loginData(payload);
+
+      // Supports both Axios response and direct API data
+      const data = response?.data ?? response;
+
+      if (data?.success) {
+        alert(data.message || "Login successful!");
+
+        setFormData({
+          email: "",
+          password: "",
+        });
+
+        setShowPassword(false);
+        navigate("/");
+        localStorage.setItem("token", data.token);
+      } else {
+        alert(data?.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      alert(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Login failed. Please try again."
+      );
+    }
+  };
+
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(
+        firebaseAuth,
+        googleProvider
+      );
+
+      const idToken = await result.user.getIdToken();
+
+      // Send Firebase token to backend
+      const data = await loginWithGoogleToken(idToken);
+
+      // Save your backend JWT and MongoDB user profile
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("role", data.user.role);
+
+      alert(data.message);
+
+      navigate("/");
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      alert(error.message || "Google login failed");
+    }
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0d0f12] flex flex-col md:flex-row font-sans m-0 p-0">
-      
+
       {/* ================= BANNER SECTION (Desktop Left / Mobile Header) ================= */}
       <div className="relative w-full md:w-5/12 lg:w-1/2 bg-[#090b0c] p-6 sm:p-8 lg:p-14 text-white flex flex-col justify-between overflow-hidden min-h-[240px] sm:min-h-[280px] md:h-full">
-        
+
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0">
           <img
@@ -72,7 +139,7 @@ export default function LoginPage() {
       {/* ================= FORM SECTION (Desktop Right / Mobile Scrollable Form) ================= */}
       <div className="relative z-20 w-full md:w-7/12 lg:w-1/2 bg-white -mt-8 md:mt-0 rounded-t-3xl md:rounded-none px-6 py-8 sm:px-12 md:px-16 lg:px-24 xl:px-32 flex flex-col justify-center text-gray-800 shadow-[0_-15px_30px_rgba(0,0,0,0.4)] md:shadow-none h-full overflow-y-auto">
         <div className="w-full max-w-md mx-auto my-auto">
-          
+
           {/* Header */}
           <div className="text-center md:text-left">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
@@ -85,7 +152,7 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-            
+
             {/* Email Field */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">
@@ -100,7 +167,7 @@ export default function LoginPage() {
                   name="email"
                   required
                   placeholder="Enter your email"
-                  value={formData.email}
+                  value={formData.email ?? ""}
                   onChange={handleChange}
                   className="w-full rounded-xl border border-gray-200 bg-gray-50/70 pl-11 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-[#d8b46a] focus:bg-white focus:ring-1 focus:ring-[#d8b46a]"
                 />
@@ -121,7 +188,7 @@ export default function LoginPage() {
                   name="password"
                   required
                   placeholder="Enter your password"
-                  value={formData.password}
+                  value={formData.password ?? ""}
                   onChange={handleChange}
                   className="w-full rounded-xl border border-gray-200 bg-gray-50/70 pl-11 pr-11 py-3 sm:py-3.5 text-xs sm:text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-[#d8b46a] focus:bg-white focus:ring-1 focus:ring-[#d8b46a]"
                 />
@@ -145,7 +212,7 @@ export default function LoginPage() {
                 <input
                   type="checkbox"
                   name="rememberMe"
-                  checked={formData.rememberMe}
+                  checked={formData.rememberMe ?? ""}
                   onChange={handleChange}
                   className="h-4 w-4 rounded border-gray-300 text-[#d8b46a] focus:ring-[#d8b46a] accent-[#d8b46a]"
                 />
@@ -182,6 +249,7 @@ export default function LoginPage() {
             {/* Google */}
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex h-11 sm:h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-[0.99]"
             >
               <svg className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">

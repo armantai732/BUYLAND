@@ -7,6 +7,7 @@ import {
   Compass,
   Maximize2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const propertiesData = [
   {
@@ -53,6 +54,7 @@ const propertiesData = [
 
 export default function PopularLands() {
   const [favorites, setFavorites] = useState({});
+  const navigate = useNavigate();
 
   const toggleFavorite = (id) => {
     setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -61,7 +63,7 @@ export default function PopularLands() {
   return (
     <section className="w-full bg-[#061517] py-12 sm:py-20 text-white font-sans">
       <div className="mx-auto max-w-7xl px-3 sm:px-8 lg:px-12">
-        
+
         {/* Header Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -84,6 +86,7 @@ export default function PopularLands() {
           <div>
             <button
               type="button"
+              onClick={() => navigate("/properties")}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] px-5 py-2.5 text-xs font-bold text-[#30230c] shadow-md transition-all hover:brightness-105 active:scale-[0.98] sm:text-sm"
             >
               <span>View All Properties</span>
@@ -119,11 +122,10 @@ export default function PopularLands() {
                   className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md transition hover:bg-black/60 sm:h-8 sm:w-8"
                 >
                   <Heart
-                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
-                      favorites[property.id]
-                        ? "fill-red-500 text-red-500"
-                        : "text-white"
-                    }`}
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${favorites[property.id]
+                      ? "fill-red-500 text-red-500"
+                      : "text-white"
+                      }`}
                   />
                 </button>
               </div>

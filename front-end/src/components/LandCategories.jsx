@@ -29,17 +29,7 @@ const categories = [
     id: 4,
     title: "Industrial Land",
     Icon: Factory,
-  },
-  {
-    id: 5,
-    title: "Recreational Land",
-    Icon: Trees,
-  },
-  {
-    id: 6,
-    title: "Investment Land",
-    Icon: TrendingUp,
-  },
+  }
 ];
 
 export default function LandCategories() {
@@ -59,7 +49,7 @@ export default function LandCategories() {
           </div>
 
           {/* View All Categories Button */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] px-5 py-2.5 text-xs font-bold text-[#30230c] shadow-md transition-all hover:brightness-105 active:scale-[0.98] sm:text-sm"
@@ -67,11 +57,11 @@ export default function LandCategories() {
               <span>View All Categories</span>
               <ArrowRight className="h-4 w-4 stroke-[2.5]" />
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Categories Cards Grid (Mobile: 2 Columns - grid-cols-2) */}
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-3 md:flex justify-center sm:gap-6 md:grid-cols-3 lg:grid-cols-6">
           {categories.map(({ id, title, Icon }) => (
             <div
               key={id}
