@@ -47,10 +47,6 @@ const propertySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    sellerWhatsapp: {
-      type: String,
-      default: "",
-    },
 
     // Price and dimensions
     price: {

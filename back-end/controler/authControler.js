@@ -189,3 +189,34 @@ export const loginController = async (req, res) => {
         });
     }
 };
+
+
+export const getMyProfileController = async (req, res) => {
+    try {
+        // User ID JWT token se milegi
+        const userId = req.user.id || req.user._id || req.user.userId;
+
+        const user = await Auth.findById(userId)
+            .select("name email mobileNumber role")
+            .lean();
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user,
+        });
+    } catch (error) {
+        console.error("Get My Profile Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch profile",
+        });
+    }
+};

@@ -14,6 +14,10 @@ import PropertyDetail from "./Pages/PropertyDetail";
 import { useEffect } from "react";
 import SellProperty from "./Pages/SellProperty";
 import UserDashboard from "./Pages/UserDashboard";
+import AdminLayout from "./admin/AdminLayout";
+import AdminApprovalsKYC from "./admin/pages/AdminApprovalsKYC";
+import AdminOverview from "./admin/pages/AdminOverview";
+import AdminPropertyListings from "./admin/pages/AdminPropertyListings";
 
 export default function App() {
   const location = useLocation();
@@ -27,7 +31,8 @@ export default function App() {
 
   const hide =
     location.pathname === "/login" ||
-    location.pathname === "/signup";
+    location.pathname === "/signup" ||
+    location.pathname.startsWith("/admindashboard")
 
 
   return (
@@ -46,6 +51,15 @@ export default function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/sale" element={<SellProperty />} />
           <Route path="/profile" element={<UserDashboard />}></Route>
+
+          <Route path="/admindashboard" element={<AdminLayout />}>
+            <Route index element={<AdminOverview />} />
+            <Route path="kyc" element={<AdminApprovalsKYC />} />
+            <Route path="properties" element={<AdminPropertyListings />} />
+            <Route path="users" element={<div className="p-8 font-serif text-xl">User Management Page</div>} />
+            <Route path="revenue" element={<div className="p-8 font-serif text-xl">Revenue Page</div>} />
+            <Route path="settings" element={<div className="p-8 font-serif text-xl">Settings Page</div>} />
+          </Route>
         </Routes>
       </main>
 

@@ -38,20 +38,35 @@ export default function LoginPage() {
       // Supports both Axios response and direct API data
       const data = response?.data ?? response;
 
+
       if (data?.success) {
-        alert(data.message || "Login successful!");
+        // Save authentication details
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        window.dispatchEvent(new Event("authChange"));
 
         setFormData({
           email: "",
           password: "",
+          rememberMe: false,
         });
 
         setShowPassword(false);
-        navigate("/");
-        localStorage.setItem("token", data.token);
+
+        alert(data.message || "Login successful!");
+
+        // Redirect according to role
+        if (data.user.role?.toLowerCase() === "admin") {
+          navigate("/admindashboard", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       } else {
         alert(data?.message || "Login failed");
       }
+
     } catch (error) {
       console.error("Login Error:", error);
 
