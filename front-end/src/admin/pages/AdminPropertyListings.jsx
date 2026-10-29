@@ -19,7 +19,7 @@ export default function AdminPropertyListings() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All"); // "All", "Success", "Processing", "Sold Out"
   const [selectedProperty, setSelectedProperty] = useState(null);
-  
+
   // States for Approval Price Form Modal
   const [approvingProperty, setApprovingProperty] = useState(null);
   const [priceForm, setPriceForm] = useState({ realPrice: "", newPrice: "" });
@@ -114,7 +114,7 @@ export default function AdminPropertyListings() {
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesStatus =
       statusFilter === "All" || item.status === statusFilter;
 
@@ -124,7 +124,7 @@ export default function AdminPropertyListings() {
   return (
     <div className="flex-1 bg-[#fbf9f5] min-h-screen overflow-y-auto p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -163,11 +163,10 @@ export default function AdminPropertyListings() {
                 key={status}
                 type="button"
                 onClick={() => setStatusFilter(status)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  statusFilter === status
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${statusFilter === status
                     ? "bg-[#061517] text-[#ffd77f] shadow"
                     : "text-gray-700 hover:text-black"
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -206,13 +205,12 @@ export default function AdminPropertyListings() {
                           {item.title}
                         </h4>
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                            item.status === "Success"
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${item.status === "Success"
                               ? "bg-emerald-100 text-emerald-700"
                               : item.status === "Sold Out"
-                              ? "bg-gray-200 text-gray-700"
-                              : "bg-amber-100 text-[#b88c3a]"
-                          }`}
+                                ? "bg-gray-200 text-gray-700"
+                                : "bg-amber-100 text-[#b88c3a]"
+                            }`}
                         >
                           {item.status}
                         </span>
@@ -260,7 +258,7 @@ export default function AdminPropertyListings() {
       {selectedProperty && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="relative w-full max-w-2xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-amber-100 max-h-[90vh] overflow-y-auto font-sans text-gray-900">
-            
+
             <button
               type="button"
               onClick={() => setSelectedProperty(null)}
@@ -275,13 +273,12 @@ export default function AdminPropertyListings() {
                   {selectedProperty.category}
                 </span>
                 <span
-                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${
-                    selectedProperty.status === "Success"
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${selectedProperty.status === "Success"
                       ? "bg-emerald-100 text-emerald-700"
                       : selectedProperty.status === "Sold Out"
-                      ? "bg-gray-200 text-gray-700"
-                      : "bg-amber-100 text-[#b88c3a]"
-                  }`}
+                        ? "bg-gray-200 text-gray-700"
+                        : "bg-amber-100 text-[#b88c3a]"
+                    }`}
                 >
                   Status: {selectedProperty.status}
                 </span>
@@ -423,7 +420,7 @@ export default function AdminPropertyListings() {
       {approvingProperty && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="relative w-full max-w-md rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-amber-100 font-sans text-gray-900">
-            
+
             <button
               type="button"
               onClick={() => setApprovingProperty(null)}
