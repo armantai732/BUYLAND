@@ -16,7 +16,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://buyland-dusky.vercel.app",
+    "https://buyland-alpha.vercel.app",
   ],
 }));
 
