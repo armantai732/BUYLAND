@@ -1,41 +1,60 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
+import AdminSidebar from "./components/AdminSidebar";
+
 
 export default function AdminLayout() {
-    const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
-    // URL ના પાથ પરથી હાલનું એક્ટિવ ટેબ નક્કી કરો (Header માટે)
-    const getActiveTabName = () => {
-        const path = location.pathname;
-        if (path.includes("properties")) return "Property Listings";
-        if (path.includes("users")) return "User Management";
-        if (path.includes("kyc")) return "Approvals & KYC";
-        if (path.includes("revenue")) return "Revenue & Subscriptions";
-        if (path.includes("settings")) return "Settings";
-        return "Overview";
+  const getActiveTab = () => {
+    const path = location.pathname;
+
+    if (path === "/admindashboard") return "Overview";
+    if (path.startsWith("/admindashboard/properties")) return "Property Listings";
+    if (path.startsWith("/admindashboard/users")) return "User Management";
+    if (path.startsWith("/admindashboard/kyc")) return "Approvals & KYC";
+    if (path.startsWith("/admindashboard/revenue")) return "Revenue & Subscriptions";
+    if (path.startsWith("/admindashboard/settings")) return "Settings";
+
+    return "Admin Dashboard";
+  };
+
+  // Close mobile sidebar after route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Prevent background scrolling while mobile sidebar is open
+  useEffect(() => {
+    if (!sidebarOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
     };
+  }, [sidebarOpen]);
 
-    return (
-        <div className="min-h-screen w-full bg-[#061517] flex flex-col md:flex-row font-sans m-0 p-0 overflow-x-hidden">
+  return (
+    <div className="min-h-screen bg-[#f8f9fa] md:flex">
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-            {/* Admin Sidebar Navigation */}
-            <AdminSidebar />
+      <div className="min-w-0 flex-1">
+        <AdminHeader
+          activeTab={getActiveTab()}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
-            {/* Main Content Wrapper (Includes Header & Nested Routes Outlet) */}
-            <div className="flex-1 flex flex-col h-screen overflow-hidden w-full">
-
-                {/* Custom Admin Header */}
-                <AdminHeader activeTab={getActiveTabName()} />
-
-                {/* Scrollable Page View Area (React Router Outlet) */}
-                <div className="flex-1 overflow-y-auto">
-                    <Outlet />
-                </div>
-
-            </div>
-
-        </div>
-    );
+        <main className="min-w-0">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
 }
