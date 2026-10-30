@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   Upload,
@@ -19,35 +20,34 @@ import { createProperty } from "../api/api";
 const initialFormData = {
   // Basic Details
   title: "",
-  propertyType: "Residential Plot",
-  ownershipType: "Single Owner",
-  sellerType: "Owner",
+  propertyType: "",
+  ownershipType: "",
+  sellerType: "",
   sellerName: "",
   sellerPhone: "",
   sellerWhatsapp: "",
 
   // Pricing & Area
   price: "",
-  isNegotiable: "Yes",
+  isNegotiable: "",
   area: "",
-  areaUnit: "sq. yd",
+  areaUnit: "",
   frontageFeet: "",
   depthFeet: "",
-  facing: "East Facing",
-  cornerPlot: "No",
-  roadWidth: "Main Road (60ft+)",
+  facing: "",
+  cornerPlot: "",
+  roadWidth: "",
 
   // Legal & Approvals
-  naStatus: "NA Approved",
-  titleClear: "Yes",
-  zoneType: "Residential Zone",
+  naStatus: "",
+  titleClear: "",
+  zoneType: "",
 
   // Location
   address: "",
   tpNumber: "",
-  plotNumber: "",
-  city: "Ahmedabad",
-  state: "Gujarat",
+  city: "",
+  state: "",
   pincode: "",
   googleMapsLink: "",
 
@@ -72,16 +72,18 @@ export default function SellProperty() {
     { name: "24/7 Security / Boundary Wall", icon: ShieldCheck },
   ];
 
-  // Clean up temporary image preview URLs on unmount
+  // Clean up image preview URLs
   useEffect(() => {
     return () => {
       imageUrlsRef.current.forEach((url) => {
         URL.revokeObjectURL(url);
       });
+
       imageUrlsRef.current = [];
     };
   }, []);
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -91,6 +93,7 @@ export default function SellProperty() {
     }));
   };
 
+  // Handle amenities
   const handleAmenityToggle = (amenityName) => {
     setSelectedAmenities((prev) =>
       prev.includes(amenityName)
@@ -99,6 +102,7 @@ export default function SellProperty() {
     );
   };
 
+  // Handle image upload
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files || []);
 
@@ -112,14 +116,18 @@ export default function SellProperty() {
     imageUrlsRef.current.push(...newImages.map((img) => img.preview));
 
     setImages((prev) => [...prev, ...newImages]);
+
+    e.target.value = "";
   };
 
+  // Remove image
   const removeImage = (index) => {
     setImages((prev) => {
       const imageToRemove = prev[index];
 
       if (imageToRemove) {
         URL.revokeObjectURL(imageToRemove.preview);
+
         imageUrlsRef.current = imageUrlsRef.current.filter(
           (url) => url !== imageToRemove.preview
         );
@@ -127,18 +135,13 @@ export default function SellProperty() {
 
       return prev.filter((_, i) => i !== index);
     });
-
-    // Clear the file input so the same file can be selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
+  // Reset form
   const resetForm = () => {
     setFormData({ ...initialFormData });
     setSelectedAmenities([]);
 
-    // Revoke temporary image preview URLs
     images.forEach((img) => {
       URL.revokeObjectURL(img.preview);
     });
@@ -146,40 +149,68 @@ export default function SellProperty() {
     imageUrlsRef.current = [];
     setImages([]);
 
-    // Clear uploaded file selection
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  // Submit property
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (submitting) return;
 
-    setSubmitting(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first to submit a property.");
+      return;
+    }
+
+    if (images.length === 0) {
+      alert("Please upload at least one property image.");
+      return;
+    }
 
     try {
-      const propertyData = {
-        ...formData,
-        amenities: selectedAmenities,
-      };
+      setSubmitting(true);
 
-      const data = await createProperty(propertyData);
+      const propertyData = new FormData();
 
-      if (data.success) {
-        resetForm();
-        alert("Property added successfully!");
-      } else {
-        alert(data.message || "Property add nahi hui");
-      }
+      // All form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        propertyData.append(key, value ?? "");
+      });
+
+      // Amenities
+      propertyData.append(
+        "amenities",
+        JSON.stringify(selectedAmenities)
+      );
+
+      // Actual image files (IMPORTANT)
+      images.forEach((image) => {
+        propertyData.append("images", image.file);
+      });
+
+      const response = await createProperty(propertyData);
+
+
+      alert(
+        response.message ||
+        "Property submitted successfully!"
+      );
+
+      resetForm();
+
     } catch (error) {
-      console.error("Create property error:", error);
-      alert(error.message || "Something went wrong");
+      console.error("Property submission error:", error);
+      alert(error.message || "Property submission failed.");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const inputClass =
     "w-full rounded-xl border border-white/10 bg-[#122e32] px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition focus:border-[#ffd77f]";
@@ -196,6 +227,7 @@ export default function SellProperty() {
   return (
     <div className="min-h-screen w-full bg-[#061517] px-4 py-10 font-sans text-white sm:px-8 lg:px-12">
       <div className="mx-auto max-w-5xl">
+
         {/* Page Header */}
         <div className="mb-8 text-center sm:text-left">
           <span className="text-xs font-semibold uppercase tracking-widest text-[#ffd77f]">
@@ -216,6 +248,7 @@ export default function SellProperty() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+
           {/* SECTION 1: SELLER CONTACT DETAILS */}
           <section className={sectionClass}>
             <h2 className={headingClass}>
@@ -224,6 +257,7 @@ export default function SellProperty() {
             </h2>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+
               <div>
                 <label className={labelClass}>I am *</label>
                 <select
@@ -231,7 +265,9 @@ export default function SellProperty() {
                   value={formData.sellerType}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Seller Type</option>
                   <option value="Owner">Owner</option>
                   <option value="Agent / Broker">Agent / Broker</option>
                   <option value="Builder / Developer">
@@ -265,6 +301,20 @@ export default function SellProperty() {
                   className={inputClass}
                 />
               </div>
+
+              <div>
+                <label className={labelClass}>WhatsApp Number *</label>
+                <input
+                  type="tel"
+                  name="sellerWhatsapp"
+                  required
+                  placeholder="+91 9876543210"
+                  value={formData.sellerWhatsapp}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
+
             </div>
           </section>
 
@@ -276,10 +326,12 @@ export default function SellProperty() {
             </h2>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
               <div className="sm:col-span-2">
                 <label className={labelClass}>
                   Property Title / Headline *
                 </label>
+
                 <input
                   type="text"
                   name="title"
@@ -293,12 +345,15 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Property Category *</label>
+
                 <select
                   name="propertyType"
                   value={formData.propertyType}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Property Type</option>
                   <option value="Residential Plot">Residential Plot</option>
                   <option value="Agricultural Land">Agricultural Land</option>
                   <option value="Commercial Land">Commercial Land</option>
@@ -309,19 +364,23 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Ownership Type</label>
+                <label className={labelClass}>Ownership Type *</label>
+
                 <select
                   name="ownershipType"
                   value={formData.ownershipType}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Ownership Type</option>
                   <option value="Single Owner">Single Owner</option>
                   <option value="Joint Ownership">Joint Ownership</option>
                   <option value="Power of Attorney">Power of Attorney</option>
                   <option value="Builder/Developer">Builder/Developer</option>
                 </select>
               </div>
+
             </div>
           </section>
 
@@ -333,14 +392,18 @@ export default function SellProperty() {
             </h2>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+
               <div>
                 <label className={labelClass}>N.A. Status *</label>
+
                 <select
                   name="naStatus"
                   value={formData.naStatus}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select N.A. Status</option>
                   <option value="NA Approved">
                     NA Approved (Residential/Commercial)
                   </option>
@@ -358,28 +421,32 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Title Clear? *</label>
+
                 <select
                   name="titleClear"
                   value={formData.titleClear}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Title Status</option>
                   <option value="Yes">Yes (Title Clear & Marketable)</option>
                   <option value="In Progress">In Progress</option>
                 </select>
               </div>
 
               <div>
-                <label className={labelClass}>Zone Type</label>
+                <label className={labelClass}>Zone Type *</label>
+
                 <select
                   name="zoneType"
                   value={formData.zoneType}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
-                  <option value="Residential Zone">
-                    Residential Zone
-                  </option>
+                  <option value="" disabled>Select Zone Type</option>
+                  <option value="Residential Zone">Residential Zone</option>
                   <option value="Residential Zone (R1/R2)">
                     Residential Zone (R1/R2)
                   </option>
@@ -390,6 +457,7 @@ export default function SellProperty() {
                   </option>
                 </select>
               </div>
+
             </div>
           </section>
 
@@ -401,8 +469,10 @@ export default function SellProperty() {
             </h2>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
               <div>
                 <label className={labelClass}>Expected Price (₹) *</label>
+
                 <input
                   type="text"
                   name="price"
@@ -415,13 +485,16 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Price Negotiable?</label>
+                <label className={labelClass}>Price Negotiable? *</label>
+
                 <select
                   name="isNegotiable"
                   value={formData.isNegotiable}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Price Type</option>
                   <option value="Yes">Yes (Negotiable)</option>
                   <option value="Fixed Price">Fixed Price</option>
                 </select>
@@ -429,11 +502,14 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Total Size / Area *</label>
+
                 <div className="flex gap-2">
                   <input
                     type="number"
                     name="area"
                     required
+                    min="0.01"
+                    step="any"
                     placeholder="1200"
                     value={formData.area}
                     onChange={handleChange}
@@ -445,7 +521,9 @@ export default function SellProperty() {
                     value={formData.areaUnit}
                     onChange={handleChange}
                     className="rounded-xl border border-white/10 bg-[#122e32] px-2 py-3 text-xs text-white outline-none"
+                    required
                   >
+                    <option value="" disabled>Select Unit</option>
                     <option value="sq. yd">sq. yd</option>
                     <option value="sq. ft">sq. ft</option>
                     <option value="Acre">Acre</option>
@@ -456,13 +534,16 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Facing Direction</label>
+                <label className={labelClass}>Facing Direction *</label>
+
                 <select
                   name="facing"
                   value={formData.facing}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Facing Direction</option>
                   <option value="East Facing">East Facing</option>
                   <option value="West Facing">West Facing</option>
                   <option value="North Facing">North Facing</option>
@@ -473,9 +554,11 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Frontage / Road Front (ft)</label>
+
                 <input
                   type="number"
                   name="frontageFeet"
+                  min="0"
                   placeholder="e.g. 40 ft"
                   value={formData.frontageFeet}
                   onChange={handleChange}
@@ -485,9 +568,11 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Plot Depth (ft)</label>
+
                 <input
                   type="number"
                   name="depthFeet"
+                  min="0"
                   placeholder="e.g. 60 ft"
                   value={formData.depthFeet}
                   onChange={handleChange}
@@ -496,13 +581,16 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Road Width</label>
+                <label className={labelClass}>Road Width *</label>
+
                 <select
                   name="roadWidth"
                   value={formData.roadWidth}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
+                  <option value="" disabled>Select Road Width</option>
                   <option value="Main Road (60ft+)">
                     Main Road (60ft+)
                   </option>
@@ -515,17 +603,21 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Corner Plot?</label>
+                <label className={labelClass}>Corner Plot? *</label>
+
                 <select
                   name="cornerPlot"
                   value={formData.cornerPlot}
                   onChange={handleChange}
                   className={inputClass}
+                  required
                 >
-                  <option value="No">No (1 Side Road)</option>
+                  <option value="" disabled>Select Corner Plot</option>
                   <option value="Yes">Yes (2 Side Roads)</option>
+                  <option value="No">No (1 Side Road)</option>
                 </select>
               </div>
+
             </div>
           </section>
 
@@ -537,10 +629,12 @@ export default function SellProperty() {
             </h2>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
               <div className="sm:col-span-2 lg:col-span-3">
                 <label className={labelClass}>
                   Complete Address or Landmark *
                 </label>
+
                 <input
                   type="text"
                   name="address"
@@ -556,6 +650,7 @@ export default function SellProperty() {
                 <label className={labelClass}>
                   TP No. / Revenue Survey No.
                 </label>
+
                 <input
                   type="text"
                   name="tpNumber"
@@ -567,19 +662,8 @@ export default function SellProperty() {
               </div>
 
               <div>
-                <label className={labelClass}>Plot Number</label>
-                <input
-                  type="text"
-                  name="plotNumber"
-                  placeholder="Enter plot number"
-                  value={formData.plotNumber}
-                  onChange={handleChange}
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
                 <label className={labelClass}>City *</label>
+
                 <input
                   type="text"
                   name="city"
@@ -593,10 +677,12 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>State *</label>
+
                 <input
                   type="text"
                   name="state"
                   required
+                  placeholder="e.g. Gujarat"
                   value={formData.state}
                   onChange={handleChange}
                   className={inputClass}
@@ -605,6 +691,7 @@ export default function SellProperty() {
 
               <div>
                 <label className={labelClass}>Pincode</label>
+
                 <input
                   type="text"
                   name="pincode"
@@ -619,6 +706,7 @@ export default function SellProperty() {
                 <label className={labelClass}>
                   Google Maps Location Link (Optional)
                 </label>
+
                 <input
                   type="url"
                   name="googleMapsLink"
@@ -628,6 +716,7 @@ export default function SellProperty() {
                   className={inputClass}
                 />
               </div>
+
             </div>
           </section>
 
@@ -645,6 +734,7 @@ export default function SellProperty() {
               </label>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
                 {amenityOptions.map(({ name, icon: Icon }) => {
                   const isChecked = selectedAmenities.includes(name);
 
@@ -654,17 +744,17 @@ export default function SellProperty() {
                       type="button"
                       onClick={() => handleAmenityToggle(name)}
                       aria-pressed={isChecked}
-                      className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all ${
-                        isChecked
-                          ? "border-[#ffd77f] bg-[#d8b46a]/20 text-[#ffd77f]"
-                          : "border-white/10 bg-[#122e32] text-gray-300 hover:border-white/20"
-                      }`}
+                      className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all ${isChecked
+                        ? "border-[#ffd77f] bg-[#d8b46a]/20 text-[#ffd77f]"
+                        : "border-white/10 bg-[#122e32] text-gray-300 hover:border-white/20"
+                        }`}
                     >
                       <Icon className="h-5 w-5 text-[#d8b46a]" />
                       <span className="text-xs font-semibold">{name}</span>
                     </button>
                   );
                 })}
+
               </div>
             </div>
 
@@ -675,6 +765,7 @@ export default function SellProperty() {
               </label>
 
               <div className="relative rounded-2xl border-2 border-dashed border-[#d8b46a]/40 bg-[#122e32]/50 p-6 text-center transition hover:border-[#ffd77f]">
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -686,14 +777,21 @@ export default function SellProperty() {
 
                 <div className="pointer-events-none flex flex-col items-center justify-center">
                   <Upload className="mb-2 h-6 w-6 text-[#ffd77f]" />
+
                   <p className="text-xs font-semibold text-white sm:text-sm">
                     Click to upload property photos
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-400">
+                    You can select multiple images
                   </p>
                 </div>
               </div>
 
+              {/* Image Preview */}
               {images.length > 0 && (
                 <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-4 lg:grid-cols-5">
+
                   {images.map((img, idx) => (
                     <div
                       key={img.preview}
@@ -715,6 +813,7 @@ export default function SellProperty() {
                       </button>
                     </div>
                   ))}
+
                 </div>
               )}
             </div>
@@ -722,7 +821,9 @@ export default function SellProperty() {
 
           {/* SECTION 7: DESCRIPTION */}
           <section className={sectionClass}>
-            <h2 className={headingClass}>7. Detailed Description</h2>
+            <h2 className={headingClass}>
+              7. Detailed Description
+            </h2>
 
             <textarea
               name="description"
@@ -741,9 +842,12 @@ export default function SellProperty() {
               disabled={submitting}
               className="w-full rounded-2xl bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] py-4 text-base font-bold text-[#30230c] shadow-xl transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? "Submitting Property..." : "Post Property For Sale"}
+              {submitting
+                ? "Submitting Property..."
+                : "Post Property For Sale"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

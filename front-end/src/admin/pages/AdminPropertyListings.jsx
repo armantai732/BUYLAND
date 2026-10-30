@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building,
   Search,
@@ -14,6 +14,7 @@ import {
   DollarSign,
   Tag,
 } from "lucide-react";
+import { getProcessingProperties } from "../../api/api";
 
 export default function AdminPropertyListings() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,53 +25,40 @@ export default function AdminPropertyListings() {
   const [approvingProperty, setApprovingProperty] = useState(null);
   const [priceForm, setPriceForm] = useState({ realPrice: "", newPrice: "" });
 
-  const [properties, setProperties] = useState([
-    {
-      id: 1,
-      title: "Commercial Plot near SG Highway",
-      category: "Commercial Plot",
-      owner: "Ramesh Patel",
-      phone: "+91 98765 43210",
-      email: "ramesh@gmail.com",
-      price: "₹ 85,00,000",
-      area: "2400 sq. yd",
-      location: "SG Highway, Ahmedabad, Gujarat",
-      status: "Success",
-      date: "28 Oct 2026",
-      mapLink: "https://maps.google.com/?q=SG+Highway+Ahmedabad",
-      description: "Prime commercial land touch with 60ft main road. Ideal for showroom or commercial tower development.",
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop",
-      kycStatus: "Verified",
-      aadhaarNo: "4589-1234-5678",
-      panNo: "ABCDE1234F",
-    },
-    {
-      id: 2,
-      title: "Agricultural Land in Mehsana",
-      category: "Agricultural Land",
-      owner: "Suresh Joshi",
-      phone: "+91 98123 45678",
-      email: "suresh.j@gmail.com",
-      price: "₹ 28,00,000",
-      area: "5 Bigha",
-      location: "Unjha Road, Mehsana, Gujarat",
-      status: "Processing",
-      date: "27 Oct 2026",
-      mapLink: "https://maps.google.com/?q=Mehsana+Gujarat",
-      description: "Fertile agricultural land with tubewell water supply and electricity connection.",
-      image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop",
-      kycStatus: "Pending Verification",
-      aadhaarNo: "7890-5678-1234",
-      panNo: "FGHIJ5678K",
-    },
-  ]);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getProcessingProperties();
+
+      if (data.success) {
+        setProperties(data.properties || []);
+      } else {
+        setProperties([]);
+      }
+    } catch (error) {
+      console.error("Fetch properties error:", error);
+      setError(error.message || "Failed to load properties");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
   // Mark as Sold Out function (Replaced Delete)
   const handleMarkAsSold = (id) => {
     if (window.confirm("Are you sure you want to mark this property as Sold Out?")) {
       setProperties(
         properties.map((item) =>
-          item.id === id ? { ...item, status: "Sold Out" } : item
+          item._id === id ? { ...item, status: "Sold Out" } : item
         )
       );
       setSelectedProperty(null);
@@ -79,7 +67,7 @@ export default function AdminPropertyListings() {
   };
 
   const handleReject = (id) => {
-    setProperties(properties.filter((item) => item.id !== id));
+    setProperties(properties.filter((item) => item._id !== id));
     alert(`Property ID #${id} Rejected & Removed!`);
     setSelectedProperty(null);
     setApprovingProperty(null);
@@ -99,21 +87,27 @@ export default function AdminPropertyListings() {
     e.preventDefault();
     setProperties(
       properties.map((item) =>
-        item.id === approvingProperty.id
+        item._id === approvingProperty._id
           ? { ...item, price: priceForm.newPrice, status: "Success" }
           : item
       )
     );
-    alert(`Property ID #${approvingProperty.id} Approved Successfully with New Price: ${priceForm.newPrice}!`);
+    alert(`Property ID #${approvingProperty._id} Approved Successfully with New Price: ${priceForm.newPrice}!`);
     setApprovingProperty(null);
     setSelectedProperty(null);
   };
 
   const filteredProperties = properties.filter((item) => {
+    const title = item.title || "";
+    const owner = item.seller?.name || item.sellerName || "";
+    const location = item.location || item.address || "";
+
+    const search = searchQuery.toLowerCase();
+
     const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase());
+      title.toLowerCase().includes(search) ||
+      owner.toLowerCase().includes(search) ||
+      location.toLowerCase().includes(search);
 
     const matchesStatus =
       statusFilter === "All" || item.status === statusFilter;
@@ -122,11 +116,12 @@ export default function AdminPropertyListings() {
   });
 
   return (
-    <div className="flex-1 bg-[#fbf9f5] min-h-screen overflow-y-auto p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
-      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+    // Outer container fixed height & overflow-hidden taaki poora page scroll na ho
+    <div className="flex-1 bg-[#fbf9f5] md:h-[660px]  flex flex-col overflow-hidden p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
+      <div className="max-w-6xl mx-auto w-full flex flex-col h-full space-y-6">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Header (Fixed) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
               Property Listings Management
@@ -143,8 +138,8 @@ export default function AdminPropertyListings() {
           </div>
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Search & Filters (Fixed) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div className="relative flex-1 max-w-md">
             <input
               type="text"
@@ -156,17 +151,17 @@ export default function AdminPropertyListings() {
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
           </div>
 
-          {/* Status Filters including Sold Out */}
           <div className="flex items-center rounded-2xl bg-gray-200/70 p-1 border border-gray-300 w-fit flex-wrap gap-1">
             {["All", "Success", "Processing", "Sold Out"].map((status) => (
               <button
                 key={status}
                 type="button"
                 onClick={() => setStatusFilter(status)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${statusFilter === status
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                  statusFilter === status
                     ? "bg-[#061517] text-[#ffd77f] shadow"
                     : "text-gray-700 hover:text-black"
-                  }`}
+                }`}
               >
                 {status}
               </button>
@@ -174,28 +169,32 @@ export default function AdminPropertyListings() {
           </div>
         </div>
 
-        {/* Properties List */}
-        <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-amber-100 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        {/* Properties List Container - Isme flex-1 aur overflow-y-auto diya hai taaki sirf yahi scroll ho */}
+        <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-amber-100 flex flex-col flex-1 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3 shrink-0">
             <h2 className="font-serif text-base sm:text-lg font-bold text-gray-900">
               Listings ({filteredProperties.length})
             </h2>
           </div>
 
-          <div className="space-y-3">
-            {filteredProperties.length === 0 ? (
+          <div className="space-y-3 overflow-y-auto pr-1 flex-1 mt-4">
+            {loading ? (
+              <div className="py-12 text-center text-gray-400 text-sm">
+                Loading properties...
+              </div>
+            ) : filteredProperties.length === 0 ? (
               <div className="py-12 text-center text-gray-400 text-sm">
                 No properties found matching your criteria.
               </div>
             ) : (
               filteredProperties.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-2xl bg-gray-50/80 border border-gray-100 hover:shadow-md transition"
                 >
                   <div className="flex items-center gap-3.5">
                     <img
-                      src={item.image}
+                      src={item.images?.[0]}
                       alt={item.title}
                       className="h-16 w-20 sm:h-16 sm:w-20 rounded-xl object-cover shrink-0 border border-gray-200"
                     />
@@ -205,21 +204,23 @@ export default function AdminPropertyListings() {
                           {item.title}
                         </h4>
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${item.status === "Success"
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                            item.status === "Success"
                               ? "bg-emerald-100 text-emerald-700"
                               : item.status === "Sold Out"
-                                ? "bg-gray-200 text-gray-700"
-                                : "bg-amber-100 text-[#b88c3a]"
-                            }`}
+                              ? "bg-gray-200 text-gray-700"
+                              : "bg-amber-100 text-[#b88c3a]"
+                          }`}
                         >
                           {item.status}
                         </span>
                       </div>
                       <p className="mt-0.5 text-[11px] sm:text-xs text-gray-500">
-                        Owner: <span className="font-semibold text-gray-700">{item.owner}</span> | Category: <span className="font-semibold text-gray-700">{item.category}</span>
+                        Owner: <span className="font-semibold text-gray-700">{item?.sellerName || item?.seller?.name}</span> | Category: <span className="font-semibold text-gray-700">{item.propertyType}</span>
                       </p>
                       <p className="text-[11px] sm:text-xs font-extrabold text-[#b88c3a] mt-0.5">
-                        {item.price} • <span className="text-gray-500 font-normal">{item.area}</span>
+                        {item.price ? `₹ ${Number(item.price).toLocaleString("en-IN")}` : "Price not available"}
+                        <span className="text-gray-500 font-normal ml-1">{item.area || item.areaSize || "N/A"}</span>
                       </p>
                     </div>
                   </div>
@@ -234,11 +235,10 @@ export default function AdminPropertyListings() {
                       <span>View Details</span>
                     </button>
 
-                    {/* Mark as Sold Out Button */}
                     {item.status !== "Sold Out" && (
                       <button
                         type="button"
-                        onClick={() => handleMarkAsSold(item.id)}
+                        onClick={() => handleMarkAsSold(item._id)}
                         className="flex items-center gap-1 rounded-xl bg-gray-800 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-black transition"
                       >
                         <Tag className="h-3.5 w-3.5 text-amber-400" />
@@ -270,15 +270,16 @@ export default function AdminPropertyListings() {
             <div className="border-b border-gray-100 pb-4">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-[#b88c3a]">
-                  {selectedProperty.category}
+                  {selectedProperty.propertyType}
                 </span>
                 <span
-                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${selectedProperty.status === "Success"
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${
+                    selectedProperty.status === "Success"
                       ? "bg-emerald-100 text-emerald-700"
                       : selectedProperty.status === "Sold Out"
-                        ? "bg-gray-200 text-gray-700"
-                        : "bg-amber-100 text-[#b88c3a]"
-                    }`}
+                      ? "bg-gray-200 text-gray-700"
+                      : "bg-amber-100 text-[#b88c3a]"
+                  }`}
                 >
                   Status: {selectedProperty.status}
                 </span>
@@ -288,14 +289,14 @@ export default function AdminPropertyListings() {
               </h2>
               <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
                 <MapPin className="h-3.5 w-3.5 text-[#b88c3a]" />
-                <span>{selectedProperty.location}</span>
+                <span>{selectedProperty.address || selectedProperty.location}</span>
               </div>
             </div>
 
             <div className="mt-5 space-y-5">
               <div className="relative h-48 sm:h-64 w-full rounded-2xl overflow-hidden shadow-inner border border-gray-100">
                 <img
-                  src={selectedProperty.image}
+                  src={selectedProperty.images?.[0]}
                   alt={selectedProperty.title}
                   className="h-full w-full object-cover"
                 />
@@ -307,15 +308,15 @@ export default function AdminPropertyListings() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 text-xs">
                 <div>
                   <span className="text-gray-400 block text-[10px] uppercase font-semibold">Area Size</span>
-                  <span className="font-bold text-gray-800">{selectedProperty.area}</span>
+                  <span className="font-bold text-gray-800">{selectedProperty.area || selectedProperty.areaSize || "N/A"}</span>
                 </div>
                 <div>
                   <span className="text-gray-400 block text-[10px] uppercase font-semibold">Added On</span>
-                  <span className="font-bold text-gray-800">{selectedProperty.date}</span>
+                  <span className="font-bold text-gray-800">{selectedProperty.createdAt || "N/A"}</span>
                 </div>
                 <div>
                   <span className="text-gray-400 block text-[10px] uppercase font-semibold">Listing ID</span>
-                  <span className="font-bold text-gray-800">#{selectedProperty.id}</span>
+                  <span className="font-bold text-gray-800">#{selectedProperty._id}</span>
                 </div>
               </div>
 
@@ -326,24 +327,24 @@ export default function AdminPropertyListings() {
                     <span>Seller & KYC Information</span>
                   </h4>
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                    {selectedProperty.kycStatus}
+                    {selectedProperty.kycStatus || "Verified"}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-800">
                   <div className="flex items-center gap-2">
                     <User className="h-3.5 w-3.5 text-[#b88c3a]" />
-                    <span>Name: <strong>{selectedProperty.owner}</strong></span>
+                    <span>Name: <strong>{selectedProperty.sellerName || selectedProperty.seller?.name}</strong></span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-3.5 w-3.5 text-[#b88c3a]" />
-                    <span>Phone: <strong>{selectedProperty.phone}</strong></span>
+                    <span>Phone: <strong>{selectedProperty.sellerPhone || selectedProperty.seller?.phone}</strong></span>
                   </div>
                   <div>
-                    <span>Aadhaar No: <strong>{selectedProperty.aadhaarNo}</strong></span>
+                    <span>Aadhaar No: <strong>[Aadhaar Redacted]</strong></span>
                   </div>
                   <div>
-                    <span>PAN Card: <strong>{selectedProperty.panNo}</strong></span>
+                    <span>PAN Card: <strong>{selectedProperty.panNo || "Not Available"}</strong></span>
                   </div>
                 </div>
               </div>
@@ -359,7 +360,7 @@ export default function AdminPropertyListings() {
 
               <div>
                 <a
-                  href={selectedProperty.mapLink}
+                  href={selectedProperty.googleMapsLink || selectedProperty.mapLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-[#b88c3a] hover:underline"
@@ -383,7 +384,7 @@ export default function AdminPropertyListings() {
                 <>
                   <button
                     type="button"
-                    onClick={() => handleReject(selectedProperty.id)}
+                    onClick={() => handleReject(selectedProperty._id)}
                     className="flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-red-700"
                   >
                     <XCircle className="h-3.5 w-3.5" />
@@ -403,7 +404,7 @@ export default function AdminPropertyListings() {
               {selectedProperty.status === "Success" && (
                 <button
                   type="button"
-                  onClick={() => handleMarkAsSold(selectedProperty.id)}
+                  onClick={() => handleMarkAsSold(selectedProperty._id)}
                   className="flex items-center gap-1.5 rounded-xl bg-gray-800 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-black"
                 >
                   <Tag className="h-3.5 w-3.5 text-amber-400" />

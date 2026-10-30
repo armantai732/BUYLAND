@@ -81,7 +81,7 @@ export default function AdminApprovalsKYC() {
   };
 
   return (
-    <div className="flex-1 bg-[#fbf9f5] min-h-screen overflow-y-auto p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
+    <div className="flex-1 bg-[#fbf9f5]  overflow-y-auto p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Header */}

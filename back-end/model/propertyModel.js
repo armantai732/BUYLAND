@@ -5,7 +5,7 @@ const propertySchema = new mongoose.Schema(
     // User who submitted the property
     seller: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Auth",
       required: true,
       index: true,
     },
@@ -47,7 +47,11 @@ const propertySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
+    sellerWhatsapp: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     // Price and dimensions
     price: {
       type: Number,
@@ -114,10 +118,6 @@ const propertySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    plotNumber: {
-      type: String,
-      default: "",
-    },
     city: {
       type: String,
       required: true,
@@ -164,7 +164,7 @@ const propertySchema = new mongoose.Schema(
     },
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Auth",
       default: null,
     },
     reviewedAt: {

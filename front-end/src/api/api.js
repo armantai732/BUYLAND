@@ -1,5 +1,9 @@
 
-const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
+// const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
+// ).replace(/\/+$/, "");
+
+
+const BASE_URL = ("http://localhost:8080"
 ).replace(/\/+$/, "");
 
 const API_URL = BASE_URL.endsWith("/api")
@@ -166,13 +170,25 @@ export const getMyProfile = async () => {
 // 6. Create Property (POST)
 export const createProperty = async (propertyData) => {
     try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         const res = await fetch(`${API_URL}/property`, {
             method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify(propertyData),
+            headers,
+            body: propertyData,
         });
 
-        const data = await res.json();
+        const responseText = await res.text();
+
+        let data;
+
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            console.error("Server response:", responseText);
+            throw new Error(`Invalid server response (${res.status})`);
+        }
 
         if (!res.ok) {
             throw new Error(data.message || "Property creation failed");
@@ -180,7 +196,31 @@ export const createProperty = async (propertyData) => {
 
         return data;
     } catch (error) {
-        console.error("Create property failed:", error.message);
+        console.error("Create property failed:", error);
         throw error;
     }
+};
+
+
+
+
+
+export const getProcessingProperties = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_URL}/property/admin/processing`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch properties");
+    }
+
+    return data;
 };

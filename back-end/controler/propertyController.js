@@ -16,7 +16,11 @@ const parsePrice = (value) => {
 // POST /api/property
 export const createProperty = async (req, res) => {
     try {
-        const userId = getUserId(req);
+        // 1. Logged-in user
+        const userId =
+            req.user?._id ||
+            req.user?.id ||
+            req.user?.userId;
 
         if (!userId) {
             return res.status(401).json({
@@ -25,57 +29,12 @@ export const createProperty = async (req, res) => {
             });
         }
 
-        const {
-            title,
-            propertyType,
-            ownershipType,
-            sellerType,
-            sellerName,
-            sellerPhone,
-            price,
-            isNegotiable,
-            area,
-            areaUnit,
-            frontageFeet,
-            depthFeet,
-            facing,
-            cornerPlot,
-            roadWidth,
-            naStatus,
-            titleClear,
-            zoneType,
-            address,
-            tpNumber,
-            plotNumber,
-            city,
-            state,
-            pincode,
-            googleMapsLink,
-            description,
-            amenities,
-            images,
-        } = req.body;
+        // 2. Form data
+        const { title, propertyType, ownershipType, sellerType, sellerName, sellerPhone, sellerWhatsapp, price, isNegotiable, area, areaUnit, frontageFeet, depthFeet, facing, cornerPlot, roadWidth, naStatus, titleClear, zoneType, address, tpNumber, city, state, pincode, googleMapsLink, description, amenities, } = req.body;
 
+        // 4. Price and area validation
         const parsedPrice = parsePrice(price);
         const parsedArea = Number(area);
-
-        if (
-            !title?.trim() ||
-            !sellerName?.trim() ||
-            !sellerPhone?.trim() ||
-            !address?.trim() ||
-            !city?.trim() ||
-            !state?.trim() ||
-            price === undefined ||
-            price === "" ||
-            area === undefined ||
-            area === ""
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Please fill all required fields.",
-            });
-        }
 
         if (
             !Number.isFinite(parsedPrice) ||
@@ -89,75 +48,138 @@ export const createProperty = async (req, res) => {
             });
         }
 
-        // Important: status and seller are set by backend,
-        // never trust these values from the frontend.
+        // 5. Parse amenities
+        let parsedAmenities = [];
+
+        try {
+            parsedAmenities = amenities
+                ? JSON.parse(amenities)
+                : [];
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid amenities data.",
+            });
+        }
+
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No images received. Please upload property images.",
+            });
+        }
+
+        // 7. Get Cloudinary URLs
+        const uploadedImages = req.files
+            .map((file) => {
+                return file.path || file.secure_url;
+            })
+            .filter((url) => typeof url === "string" && url.trim() !== "");
+
+        console.log("Cloudinary image URLs:", uploadedImages);
+
+        if (uploadedImages.length !== req.files.length) {
+            return res.status(500).json({
+                success: false,
+                message: "Some images were not uploaded to Cloudinary.",
+            });
+        }
+
+        // 8. Create property
         const property = await Property.create({
             seller: userId,
+
+            // Basic details
             title,
             propertyType,
             ownershipType,
             sellerType,
             sellerName,
             sellerPhone,
+            sellerWhatsapp,
+
+            // Price and dimensions
             price: parsedPrice,
-            isNegotiable,
+            isNegotiable: isNegotiable || "Yes",
             area: parsedArea,
             areaUnit,
-            frontageFeet: frontageFeet ? Number(frontageFeet) : 0,
-            depthFeet: depthFeet ? Number(depthFeet) : 0,
+
+            frontageFeet: frontageFeet
+                ? Number(frontageFeet)
+                : 0,
+
+            depthFeet: depthFeet
+                ? Number(depthFeet)
+                : 0,
+
             facing,
-            cornerPlot,
+            cornerPlot: cornerPlot || "No",
             roadWidth,
+
+            // Legal details
             naStatus,
-            titleClear,
+            titleClear: titleClear || "Yes",
             zoneType,
+
+            // Location
             address,
             tpNumber,
-            plotNumber,
             city,
             state,
             pincode,
             googleMapsLink,
             description,
-            amenities: Array.isArray(amenities) ? amenities : [],
-            images: Array.isArray(images) ? images : [],
+
+            // Amenities and images
+            amenities: parsedAmenities,
+            images: uploadedImages,
+
+            // Approval
             status: "Processing",
         });
 
+        // 9. Success response
         return res.status(201).json({
             success: true,
-            message: "Property submitted successfully. Waiting for admin approval.",
+            message:
+                "Property submitted successfully. Waiting for admin approval.",
             property,
         });
+
     } catch (error) {
-        console.error("Create property error:", error);
+        console.error("Create Property Error:", error);
 
         return res.status(500).json({
             success: false,
-            message: "Failed to submit property.",
+            message: error.message || "Internal server error",
         });
     }
 };
+
 
 // 2. ADMIN: Get all properties awaiting approval
 // GET /api/property/admin/processing
 export const getProcessingProperties = async (req, res) => {
     try {
-        const properties = await Property.find({ status: "Processing" })
-            .populate("seller", "name email")
-            .sort({ createdAt: -1 });
+
+        const properties = await Property.find({
+            status: "Processing"
+        }).sort({ createdAt: -1 });
+
 
         return res.status(200).json({
             success: true,
             count: properties.length,
             properties,
         });
+
     } catch (error) {
-        console.error("Get processing properties error:", error);
+        console.error("GET PROCESSING PROPERTIES ERROR:", error);
 
         return res.status(500).json({
             success: false,
-            message: "Failed to fetch processing properties.",
+            message: error.message,
         });
     }
 };

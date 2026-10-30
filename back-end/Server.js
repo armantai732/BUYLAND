@@ -1,47 +1,49 @@
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-
 import { DBCONNECT } from "./config/DB.js";
 import authRoute from "./router/authRouter.js";
 import activitiesRouter from "./router/activityRoutes.js";
 import propertyRoutes from "./router/propertyRoutes.js";
 import dashboardRouter from "./router/dashboardRoutes.js";
+import multer from "multer";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://buyland-alpha.vercel.app",
-  ],
+// CORS
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://buyland-alpha.vercel.app",
+    ],
+    credentials: true,
+  })
+);
+
+// JSON requests only (multipart/form-data is handled by Multer)
+app.use(express.json({
+  limit: "10mb",
+  type: ["application/json", "application/*+json"],
 }));
 
-app.use(express.json());
+// URL-encoded requests
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "10mb",
+  })
+);
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "BuyLand backend is running",
-  });
-});
 
+// API routes
 app.use("/api/auth", authRoute);
 app.use("/api/activities", activitiesRouter);
 app.use("/api/property", propertyRoutes);
 app.use("/api/dashboard", dashboardRouter);
 
-// Return JSON instead of an HTML 404 page for unknown API routes
-app.use("/api", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API route not found",
-    path: req.originalUrl,
-  });
-});
 
 const PORT = process.env.PORT || 8080;
 

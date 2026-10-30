@@ -2,6 +2,7 @@ import express from "express";
 import { approveProperty, createProperty, getApprovedProperties, getMyProperties, getProcessingProperties, rejectProperty } from "../controler/propertyController.js";
 import verifyToken from "../middelware/verifyToken.js";
 import isAdmin from "../middelware/isAdmin.js";
+import upload from "../middelware/upload.js";
 
 const propertyRoutes = express.Router();
 
@@ -9,7 +10,10 @@ const propertyRoutes = express.Router();
 propertyRoutes.get("/approved", getApprovedProperties);
 
 // User: Submit a property (default status: Processing)
-propertyRoutes.post("/", verifyToken, createProperty);
+propertyRoutes.post("/",
+    verifyToken,
+    upload.array("images", 20),
+    createProperty);
 
 // User: View own submitted properties and their status
 propertyRoutes.get("/my-properties", verifyToken, getMyProperties);
