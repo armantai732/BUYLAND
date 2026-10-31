@@ -55,7 +55,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
     const menuItems = [
         { name: "Dashboard", icon: LayoutDashboard },
-        { name: "My Profile", icon: User },
         { name: "My Wishlist", icon: Heart },
         { name: "Messages", icon: MessageSquare },
         { name: "Settings", icon: Settings },

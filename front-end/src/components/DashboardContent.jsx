@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Building2,
@@ -8,6 +7,7 @@ import {
   Activity,
   User,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getDashboardStats,
@@ -144,6 +144,7 @@ export default function DashboardContent({
   const pageDescriptions = {
     Dashboard: "Welcome back! Here's your property overview.",
     "My Profile": "View and manage your profile information.",
+    KYC: "Complete your identity and document verification.",
     "My Wishlist": "Your saved properties will appear here.",
     Messages: "View your property-related conversations.",
     Settings: "Manage your account preferences.",
@@ -153,8 +154,8 @@ export default function DashboardContent({
     switch (activeTab) {
       case "My Profile":
         return User;
-      case "My Wishlist":
-        return Heart;
+      case "KYC":
+        return ShieldCheck;
       case "Messages":
         return MessageSquare;
       case "Settings":
@@ -167,9 +168,9 @@ export default function DashboardContent({
   const TabIcon = getTabIcon();
 
   return (
-    <main className="min-h-screen w-full bg-[#fbf9f5] p-4 text-gray-900 sm:p-8 lg:p-10">
+    <main className="w-full bg-[#fbf9f5] p-4 text-gray-900 sm:p-6 lg:p-8 font-sans">
 
-      <div className="mx-auto w-full max-w-7xl space-y-7 sm:space-y-8">
+      <div className="mx-auto w-full max-w-7xl space-y-6 sm:space-y-8">
 
         {/* Header */}
         <div>
@@ -228,7 +229,7 @@ export default function DashboardContent({
               })}
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Activity with Scrollable Container */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-[#b88c3a]" />
@@ -246,7 +247,8 @@ export default function DashboardContent({
                   Abhi koi recent activity nahi hai.
                 </div>
               ) : (
-                <div className="space-y-3">
+                /* Scrollable box added here */
+                <div className="md:max-h-[380px]  overflow-y-auto space-y-3 pr-1 custom-scrollbar">
                   {recentActivities.map((activity, idx) => (
                     <div
                       key={
@@ -305,18 +307,6 @@ export default function DashboardContent({
           </>
         )}
 
-        {/* Other Tabs */}
-        {activeTab === "My Profile" && (
-          <section className="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
-            <User className="mb-3 h-7 w-7 text-[#b88c3a]" />
-            <h2 className="font-serif text-lg font-bold">
-              My Profile
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Profile details aur edit form yahan add kar sakte hain.
-            </p>
-          </section>
-        )}
 
         {activeTab === "My Wishlist" && (
           <section className="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">

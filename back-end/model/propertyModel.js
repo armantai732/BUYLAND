@@ -1,8 +1,9 @@
+
 import mongoose from "mongoose";
 
 const propertySchema = new mongoose.Schema(
   {
-    // User who submitted the property
+    // Seller
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Auth",
@@ -10,7 +11,7 @@ const propertySchema = new mongoose.Schema(
       index: true,
     },
 
-    // Basic details
+    // Basic Details
     title: {
       type: String,
       required: true,
@@ -30,12 +31,14 @@ const propertySchema = new mongoose.Schema(
     },
     ownershipType: {
       type: String,
+      required: true,
       default: "Single Owner",
     },
     sellerType: {
       type: String,
       enum: ["Owner", "Agent / Broker", "Builder / Developer"],
       default: "Owner",
+      required: true,
     },
     sellerName: {
       type: String,
@@ -52,7 +55,33 @@ const propertySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    // Price and dimensions
+
+    // KYC Details
+    aadhaarNo: {
+      type: String,
+      required: true,
+      trim: true,
+      select: false,
+    },
+    panNo: {
+      type: String,
+      required: true,
+      uppercase: true,
+      trim: true,
+      select: false,
+    },
+    aadhaarPhoto: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    panPhoto: {
+      type: String,
+      required: true,
+      select: false,
+    },
+
+    // Pricing & Area
     price: {
       type: Number,
       required: true,
@@ -70,7 +99,8 @@ const propertySchema = new mongoose.Schema(
     },
     areaUnit: {
       type: String,
-      default: "sq. yd",
+      required: true,
+      enum: ["sq. yd", "sq. ft", "Acre", "Bigha", "Guntha"],
     },
     frontageFeet: {
       type: Number,
@@ -82,7 +112,14 @@ const propertySchema = new mongoose.Schema(
     },
     facing: {
       type: String,
-      default: "East Facing",
+      required: true,
+      enum: [
+        "East Facing",
+        "West Facing",
+        "North Facing",
+        "South Facing",
+        "Corner Plot",
+      ],
     },
     cornerPlot: {
       type: String,
@@ -91,21 +128,22 @@ const propertySchema = new mongoose.Schema(
     },
     roadWidth: {
       type: String,
-      default: "Main Road (60ft+)",
+      required: true,
     },
 
-    // Legal details
+    // Legal & Approval Details
     naStatus: {
       type: String,
-      default: "NA Approved",
+      required: true,
     },
     titleClear: {
       type: String,
-      default: "Yes",
+      required: true,
+      enum: ["Yes", "In Progress"],
     },
     zoneType: {
       type: String,
-      default: "Residential Zone",
+      required: true,
     },
 
     // Location
@@ -137,21 +175,36 @@ const propertySchema = new mongoose.Schema(
       default: "",
     },
 
-    // Description and images
+    // Description
     description: {
       type: String,
       default: "",
     },
+
+    // Amenities
     amenities: {
       type: [String],
       default: [],
     },
+
+    // Main Property Images
     images: {
       type: [String],
-      default: [],
+      required: true,
+      validate: {
+        validator: (value) => value.length > 0,
+        message: "At least one property image is required.",
+      },
     },
 
-    // Approval workflow
+    // Multiple Property Legal Documents
+    propertyLegalDocs: {
+      type: [String],
+      default: [],
+      select: false,
+    },
+
+    // Approval Workflow
     status: {
       type: String,
       enum: ["Processing", "Approved", "Rejected"],

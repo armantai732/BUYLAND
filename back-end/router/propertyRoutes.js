@@ -1,45 +1,66 @@
+
 import express from "express";
-import { approveProperty, createProperty, getApprovedProperties, getMyProperties, getProcessingProperties, rejectProperty } from "../controler/propertyController.js";
+
+import {
+  approveProperty,
+  createProperty,
+  getApprovedProperties,
+  getMyProperties,
+  getProcessingProperties,
+  rejectProperty,
+} from "../controler/propertyController.js";
+
 import verifyToken from "../middelware/verifyToken.js";
 import isAdmin from "../middelware/isAdmin.js";
 import upload from "../middelware/upload.js";
 
 const propertyRoutes = express.Router();
 
-// Public: Only admin-approved properties
+// Public: Approved properties
 propertyRoutes.get("/approved", getApprovedProperties);
 
-// User: Submit a property (default status: Processing)
-propertyRoutes.post("/",
-    verifyToken,
-    upload.array("images", 20),
-    createProperty);
-
-// User: View own submitted properties and their status
-propertyRoutes.get("/my-properties", verifyToken, getMyProperties);
-
-// Admin: View properties awaiting approval
-propertyRoutes.get(
-    "/admin/processing",
-    verifyToken,
-    isAdmin,
-    getProcessingProperties
+// User: Submit property
+propertyRoutes.post(
+  "/",
+  verifyToken,
+  upload.fields([
+    { name: "images", maxCount: 20 },
+    { name: "aadhaarPhoto", maxCount: 1 },
+    { name: "panPhoto", maxCount: 1 },
+    { name: "propertyLegalDocs", maxCount: 10 },
+  ]),
+  createProperty
 );
 
-// Admin: Approve property and optionally change listing price
+// User: Own properties
+propertyRoutes.get(
+  "/my-properties",
+  verifyToken,
+  getMyProperties
+);
+
+// Admin: Processing properties
+propertyRoutes.get(
+  "/admin/processing",
+  verifyToken,
+  isAdmin,
+  getProcessingProperties
+);
+
+// Admin: Approve property
 propertyRoutes.patch(
-    "/admin/:id/approve",
-    verifyToken,
-    isAdmin,
-    approveProperty
+  "/admin/:id/approve",
+  verifyToken,
+  isAdmin,
+  approveProperty
 );
 
 // Admin: Reject property
 propertyRoutes.patch(
-    "/admin/:id/reject",
-    verifyToken,
-    isAdmin,
-    rejectProperty
+  "/admin/:id/reject",
+  verifyToken,
+  isAdmin,
+  rejectProperty
 );
 
 export default propertyRoutes;

@@ -21,7 +21,7 @@ export default function UserDashboard() {
     }, []);
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-[#061517] md:flex-row">
+        <div className="flex min-h-screen w-full flex-col bg-[#090b0c] md:flex-row">
             {/* Sidebar: mobile par upar, desktop par left side */}
             <aside className="w-full shrink-0 sm:pt-[88px] md:w-64 md:pt-0 lg:w-72">
                 <Sidebar
