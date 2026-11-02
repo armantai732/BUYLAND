@@ -4,10 +4,12 @@ import express from "express";
 import {
   approveProperty,
   createProperty,
+  getAllProperties,
   getApprovedProperties,
   getMyProperties,
   getProcessingProperties,
   rejectProperty,
+  updateApprovedProperty,
 } from "../controler/propertyController.js";
 
 import verifyToken from "../middelware/verifyToken.js";
@@ -61,6 +63,16 @@ propertyRoutes.patch(
   verifyToken,
   isAdmin,
   rejectProperty
+);
+
+
+propertyRoutes.get("/admin/all", verifyToken, isAdmin, getAllProperties);
+
+propertyRoutes.patch(
+  "/admin/:id/sold-out",
+  verifyToken,
+  isAdmin,
+  updateApprovedProperty
 );
 
 export default propertyRoutes;

@@ -1,269 +1,263 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  Search,
+  Heart,
+  User,
+  ChevronDown,
+  ArrowRight,
+  Building2,
+} from "lucide-react";
 
 const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Properties", path: "/properties" },
-    { name: "About", path: "/about" },
-    { name: "Services", path: "/services" },
-    { name: "Contact", path: "/contact" },
-    { name: "Sale", path: "/sale" },
+  { name: "Home", path: "/" },
+  { name: "Properties", path: "/properties" },
+  { name: "About", path: "/about" },
+  { name: "Services", path: "/services" },
+  { name: "Contact", path: "/contact" },
+  { name: "Sale", path: "/sale" },
 ];
 
 function HouseLogo() {
-    return (
-        <svg
-            viewBox="0 0 58 58"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-12 w-12 shrink-0 sm:h-14 sm:w-14"
-            aria-label="BuyLand house logo"
-        >
-            <path
-                d="M5 27L29 4L53 27V52H5V27Z"
-                stroke="#F5D58A"
-                strokeWidth="3.5"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M12 28L29 12L46 28V46H12V28Z"
-                stroke="#D7B66B"
-                strokeWidth="1.4"
-            />
-            <path
-                d="M21 45V32L29 26L37 32V45"
-                stroke="#F5D58A"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M26 45V37H32V45"
-                stroke="#F5D58A"
-                strokeWidth="2"
-            />
-        </svg>
-    );
-}
-
-function ProfileIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M5 21a7 7 0 0 1 14 0" />
-        </svg>
-    );
+  return (
+    <svg
+      viewBox="0 0 58 58"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-10 w-10 shrink-0 sm:h-12 sm:w-12"
+      aria-label="BuyLand house logo"
+    >
+      <path
+        d="M5 27L29 4L53 27V52H5V27Z"
+        stroke="#D99B26"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 28L29 12L46 28V46H12V28Z"
+        stroke="#C68A1B"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M21 45V32L29 26L37 32V45"
+        stroke="#D99B26"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M26 45V37H32V45"
+        stroke="#D99B26"
+        strokeWidth="2"
+      />
+    </svg>
+  );
 }
 
 export default function Navbar() {
-    const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => Boolean(localStorage.getItem("token"))
+  );
+  const navigate = useNavigate();
 
-    const [isLoggedIn, setIsLoggedIn] = useState(
-        () => Boolean(localStorage.getItem("token"))
-    );
-
-    const navigate = useNavigate();
-
-    // Update login status when token changes
-    useEffect(() => {
-        const checkLogin = () => {
-            setIsLoggedIn(Boolean(localStorage.getItem("token")));
-        };
-
-        window.addEventListener("storage", checkLogin);
-
-        // Custom event for same-tab login/logout
-        window.addEventListener("authChange", checkLogin);
-
-        return () => {
-            window.removeEventListener("storage", checkLogin);
-            window.removeEventListener("authChange", checkLogin);
-        };
-    }, []);
-
-    // Sale page requires login
-    const handleSaleClick = (e) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            e.preventDefault();
-            setMenuOpen(false);
-            navigate("/login");
-            return;
-        }
-
-        setMenuOpen(false);
+  useEffect(() => {
+    const checkLogin = () => {
+      setIsLoggedIn(Boolean(localStorage.getItem("token")));
     };
 
-    // Close mobile menu after navigation
-    const handleNavClick = (e, path) => {
-        if (path === "/sale") {
-            handleSaleClick(e);
-        } else {
-            setMenuOpen(false);
-        }
+    window.addEventListener("storage", checkLogin);
+    window.addEventListener("authChange", checkLogin);
+
+    return () => {
+      window.removeEventListener("storage", checkLogin);
+      window.removeEventListener("authChange", checkLogin);
     };
+  }, []);
 
-    const navLinkClass = ({ isActive }) =>
-        `relative py-2 text-[13px] font-medium transition-colors duration-200 lg:text-sm
-        after:absolute after:-bottom-1 after:left-0 after:h-[2px]
-        after:bg-[#F5D58A] after:transition-all after:duration-300
-        after:ease-in-out after:content-['']
-        ${
-            isActive
-                ? "text-[#F5D58A] after:w-full"
-                : "text-white/90 after:w-0 hover:text-[#F5D58A] hover:after:w-full"
-        }`;
+  const handleSaleClick = (e) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      e.preventDefault();
+      setMenuOpen(false);
+      navigate("/login");
+      return;
+    }
+    setMenuOpen(false);
+  };
 
-    return (
-        <header className="fixed z-50 w-full border-b border-white/[0.06] bg-gradient-to-r from-[#101114] via-[#22232b] to-[#15151a] text-white shadow-lg">
-            <nav className="mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between px-5 sm:min-h-[88px] sm:px-8 lg:px-10">
+  const handleNavClick = (e, path) => {
+    if (path === "/sale") {
+      handleSaleClick(e);
+    } else {
+      setMenuOpen(false);
+    }
+  };
 
-                {/* Logo */}
-                <Link
-                    to="/"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex shrink-0 items-center gap-2"
-                    aria-label="BuyLand home"
-                >
-                    <HouseLogo />
+  const navLinkClass = ({ isActive }) =>
+    `relative py-2 text-sm font-semibold transition-colors duration-200 lg:text-base ${
+      isActive
+        ? "text-[#D99B26] font-bold"
+        : "text-[#10223B] hover:text-[#D99B26]"
+    }`;
 
-                    <span className="font-serif text-[25px] font-bold tracking-tight text-[#F5D58A] sm:text-[29px]">
-                        BuyLand
-                    </span>
-                </Link>
+  return (
+    <header className="fixed top-0 z-50 w-full border-b border-gray-100 bg-white shadow-sm font-sans">
+      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-                {/* Desktop Navigation */}
-                <div className="hidden items-center gap-6 md:flex lg:gap-8">
-                    {navLinks.map((link) => (
-                        <NavLink
-                            key={link.name}
-                            to={link.path}
-                            end={link.path === "/"}
-                            onClick={(e) => handleNavClick(e, link.path)}
-                            className={navLinkClass}
-                        >
-                            {link.name}
-                        </NavLink>
-                    ))}
-                </div>
+        {/* Logo & Brand */}
+        <Link
+          to="/"
+          onClick={() => setMenuOpen(false)}
+          className="flex shrink-0 items-center gap-2.5"
+          aria-label="BuyLand home"
+        >
+          <HouseLogo />
+          <div className="flex flex-col">
+            <span className="font-serif text-2xl font-extrabold tracking-tight text-[#D99B26] sm:text-[27px]">
+              BuyLand
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-500 -mt-1">
+              Find Your Dream Land
+            </span>
+          </div>
+        </Link>
 
-                {/* Desktop Authentication / Profile */}
-                <div className="hidden items-center gap-3 sm:flex">
-                    {isLoggedIn ? (
-                        <Link
-                            to="/profile"
-                            className="flex items-center gap-2 rounded-full border border-[#F5D58A]/40 bg-[#202127] px-5 py-[10px] text-sm font-semibold text-[#F5D58A] transition duration-200 hover:bg-[#2b2c33]"
-                        >
-                            <ProfileIcon />
-                            Profile
-                        </Link>
-                    ) : (
-                        <>
-                            <Link
-                                to="/login"
-                                className="rounded-full border border-white/[0.04] bg-[#202127] px-6 py-[10px] text-sm font-semibold text-white shadow-inner transition duration-200 hover:border-[#F5D58A]/40 hover:text-[#F5D58A]"
-                            >
-                                Login
-                            </Link>
+        {/* Desktop Navigation */}
+        <div className="hidden items-center gap-7 md:flex lg:gap-9">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.name}
+              to={link.path}
+              end={link.path === "/"}
+              onClick={(e) => handleNavClick(e, link.path)}
+              className={navLinkClass}
+            >
+              {link.name === "Properties" ? (
+                <span className="flex items-center gap-1">
+                  Properties <ChevronDown size={14} />
+                </span>
+              ) : (
+                link.name
+              )}
+            </NavLink>
+          ))}
+        </div>
 
-                            <Link
-                                to="/signup"
-                                className="rounded-full border border-[#FFE6A5] bg-gradient-to-b from-[#FFE5A0] to-[#EBC76D] px-6 py-[10px] text-sm font-bold text-[#30230C] shadow-[0_0_12px_rgba(245,213,138,0.12)] transition duration-200 hover:brightness-110"
-                            >
-                                Sign Up
-                            </Link>
-                        </>
-                    )}
-                </div>
+        {/* Right Actions & Auth */}
+        <div className="hidden items-center gap-4 md:flex">
+          {/* Search Icon */}
+          <button
+            onClick={() => alert("Search clicked")}
+            className="rounded-full p-2 text-[#10223B] transition hover:bg-gray-100 hover:text-[#D99B26]"
+            aria-label="Search"
+          >
+            <Search size={20} />
+          </button>
 
-                {/* Mobile Menu Button */}
+          {/* Divider */}
+          <div className="h-5 w-[1px] bg-gray-200" />
+
+          {/* Wishlist / Favorites */}
+          <button
+            onClick={() => navigate("/wishlist")}
+            className="relative rounded-full p-2 text-[#10223B] transition hover:bg-gray-100 hover:text-[#D99B26]"
+            aria-label="Wishlist"
+          >
+            <Heart size={20} />
+            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow">
+              2
+            </span>
+          </button>
+
+          {/* Profile / Login */}
+          {isLoggedIn ? (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="rounded-full p-2 text-[#10223B] transition hover:bg-gray-100 hover:text-[#D99B26]"
+              aria-label="Profile"
+            >
+              <User size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="flex items-center gap-1.5 rounded-xl bg-[#E8B33B] px-5 py-2.5 text-xs font-bold text-[#10223B] shadow-md transition hover:bg-[#d99b26] active:scale-95"
+            >
+              <span>Login / Signup</span>
+              <ArrowRight size={15} strokeWidth={2.5} />
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-lg border border-gray-200 bg-gray-50 md:hidden"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          <span
+            className={`h-0.5 w-5 bg-[#10223B] transition-transform ${
+              menuOpen ? "translate-y-[7px] rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-5 bg-[#10223B] transition-opacity ${
+              menuOpen ? "opacity-0" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-5 bg-[#10223B] transition-transform ${
+              menuOpen ? "-translate-y-[7px] -rotate-45" : ""
+            }`}
+          />
+        </button>
+      </nav>
+
+      {/* Mobile Dropdown */}
+      {menuOpen && (
+        <div className="absolute left-0 top-full w-full border-t border-gray-100 bg-white px-5 py-4 shadow-xl md:hidden">
+          <div className="flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.name}
+                to={link.path}
+                end={link.path === "/"}
+                onClick={(e) => handleNavClick(e, link.path)}
+                className="py-2 text-sm font-semibold text-[#10223B] hover:text-[#D99B26]"
+              >
+                {link.name}
+              </NavLink>
+            ))}
+
+            <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-4">
+              <button
+                onClick={() => { navigate("/wishlist"); setMenuOpen(false); }}
+                className="flex items-center gap-2 text-sm font-semibold text-[#10223B]"
+              >
+                <Heart size={18} /> Wishlist (2)
+              </button>
+
+              {isLoggedIn ? (
                 <button
-                    type="button"
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                    className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/10 bg-white/5 md:hidden"
-                    aria-label={menuOpen ? "Close menu" : "Open menu"}
-                    aria-expanded={menuOpen}
+                  onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}
+                  className="flex items-center gap-2 text-sm font-semibold text-[#10223B]"
                 >
-                    <span
-                        className={`h-0.5 w-5 bg-[#F5D58A] transition-transform ${
-                            menuOpen ? "translate-y-[7px] rotate-45" : ""
-                        }`}
-                    />
-                    <span
-                        className={`h-0.5 w-5 bg-[#F5D58A] transition-opacity ${
-                            menuOpen ? "opacity-0" : ""
-                        }`}
-                    />
-                    <span
-                        className={`h-0.5 w-5 bg-[#F5D58A] transition-transform ${
-                            menuOpen ? "-translate-y-[7px] -rotate-45" : ""
-                        }`}
-                    />
+                  <User size={18} /> Profile
                 </button>
-            </nav>
-
-            {/* Mobile Dropdown */}
-            {menuOpen && (
-                <div className="absolute left-0 top-full w-full border-t border-white/10 bg-[#15161b] px-5 py-5 shadow-2xl md:hidden">
-                    <div className="flex flex-col gap-1">
-                        {navLinks.map((link) => (
-                            <NavLink
-                                key={link.name}
-                                to={link.path}
-                                end={link.path === "/"}
-                                onClick={(e) => handleNavClick(e, link.path)}
-                                className={navLinkClass}
-                            >
-                                {link.name}
-                            </NavLink>
-                        ))}
-
-                        {/* Mobile Authentication / Profile */}
-                        <div className="mt-3 flex gap-3 border-t border-white/10 pt-4">
-                            {isLoggedIn ? (
-                                <Link
-                                    to="/profile"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center justify-center gap-2 rounded-full border border-[#F5D58A]/40 bg-[#202127] py-3 text-sm font-semibold text-[#F5D58A]"
-                                >
-                                    <ProfileIcon />
-                                    My Profile
-                                </Link>
-                            ) : (
-                                <>
-                                    <Link
-                                        to="/login"
-                                        onClick={() => setMenuOpen(false)}
-                                        className="flex-1 rounded-full border border-white/10 bg-[#202127] py-3 text-center text-sm font-semibold text-white"
-                                    >
-                                        Login
-                                    </Link>
-
-                                    <Link
-                                        to="/signup"
-                                        onClick={() => setMenuOpen(false)}
-                                        className="flex-1 rounded-full bg-gradient-to-b from-[#FFE5A0] to-[#EBC76D] py-3 text-center text-sm font-bold text-[#30230C]"
-                                    >
-                                        Sign Up
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </header>
-    );
+              ) : (
+                <button
+                  onClick={() => { navigate("/login"); setMenuOpen(false); }}
+                  className="rounded-xl bg-[#E8B33B] px-5 py-2 text-xs font-bold text-[#10223B]"
+                >
+                  Login / Signup →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }

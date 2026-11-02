@@ -6,16 +6,11 @@ import {
   Handshake,
   ChevronDown,
   Search,
+  ShieldCheck,
+  Headphones,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import landHero from "../assets/GoldenBg.png";
-
-const stats = [
-  { value: "10K+", label: "Happy Customers", Icon: UsersRound },
-  { value: "5K+", label: "Properties Listed", Icon: House },
-  { value: "50+", label: "Cities Covered", Icon: MapPin },
-  { value: "100%", label: "Trusted Platform", Icon: Handshake },
-];
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -42,13 +37,13 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative isolate flex min-h-[650px] flex-col justify-between overflow-hidden bg-[#090b0c] text-white sm:min-h-[700px] lg:min-h-[640px]"
+      className="relative isolate flex min-h-[650px] flex-col justify-between overflow-hidden bg-[#090b0c] text-white sm:min-h-[700px] lg:min-h-[646px]"
     >
       {/* Background Image */}
       <div className="absolute inset-0 -z-20">
         <img
           src={landHero}
-          alt="Golden sunset over available land"
+          alt="Golden luxury villa real estate background"
           className="h-full w-full object-cover object-[65%_center] brightness-90 sm:object-center"
         />
       </div>
@@ -57,20 +52,29 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/95 via-black/70 to-black/20 sm:from-black/90 sm:via-black/60 sm:to-transparent" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#090b0c] via-transparent to-black/40" />
 
-      {/* Plot Highlight */}
-      <div className="pointer-events-none absolute right-[8%] top-[22%] -z-10 hidden rotate-[-6deg] scale-95 lg:block xl:scale-100">
-        <div className="relative h-48 w-80 rounded-2xl border-2 border-[#facc15] bg-yellow-400/10 shadow-[0_0_40px_rgba(250,204,21,0.5)] backdrop-blur-[2px] xl:h-56 xl:w-96">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-yellow-400/40 bg-white/95 text-[#a16207] shadow-xl">
-              <House className="h-6 w-6 fill-amber-500/20" />
-            </div>
+      {/* Bottom Right Trusted Real Estate Partner Badge */}
+      <div className="pointer-events-none absolute right-[6%] bottom-[15%] -z-10 hidden rotate-[-4deg] scale-95 lg:block xl:scale-100">
+        <div className="relative flex flex-col items-center justify-center rounded-2xl border-2 border-[#facc15] bg-[#17191c]/90 px-6 py-4 shadow-[0_0_40px_rgba(250,204,21,0.4)] backdrop-blur-md">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-yellow-400/40 bg-yellow-500/10 text-[#ffd77f] shadow-xl mb-1.5">
+            <House className="h-6 w-6 fill-amber-500/20" />
           </div>
+          <span className="font-serif text-xs font-bold tracking-wider text-amber-300">
+            Your Trusted
+          </span>
+          <span className="text-[11px] font-medium text-gray-300">
+            Real Estate Partner
+          </span>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-8 pt-10 sm:px-8 sm:pt-16 lg:px-12 lg:pt-12">
-        <div className="max-w-[640px]">
+        <div className="max-w-[700px]">
+          {/* Premium Real Estate Subtitle Tag */}
+          <span className="mb-2 inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#ffd77f]">
+            Premium Real Estate
+          </span>
+
           <h1 className="font-serif text-[40px] font-semibold leading-[1.08] tracking-tight sm:text-6xl sm:leading-[1.05] lg:text-[72px]">
             <span className="block text-white">Find Your</span>
             <span className="mt-1 block bg-gradient-to-r from-[#FFE59A] via-[#FFD77F] to-[#D7B66B] bg-clip-text italic text-transparent">
@@ -79,36 +83,27 @@ export default function Hero() {
           </h1>
 
           <p className="mt-4 max-w-[500px] text-sm leading-relaxed text-gray-200 sm:mt-5 sm:text-base sm:leading-7 lg:text-lg">
-            Invest in the perfect land for a better tomorrow.
-            <span className="block sm:inline lg:block">
-              {" "}Residential, Agricultural &amp; Commercial lands.
-            </span>
+            Buy, Sell and Invest in the Best Properties with Confidence.
           </p>
 
           {/* Search Form */}
           <form
             onSubmit={handleSearch}
-            className="mt-6 flex flex-col gap-2.5 rounded-2xl bg-white/90 p-3 shadow-2xl backdrop-blur-md sm:mt-8 sm:gap-3 sm:p-4 lg:mt-8 lg:flex-row lg:items-center lg:gap-0 lg:rounded-full lg:bg-white lg:p-1.5 lg:shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
+            className="mt-6 flex flex-col gap-2.5 rounded-2xl bg-white/95 p-3 shadow-2xl backdrop-blur-md sm:mt-8 sm:gap-3 sm:p-4 lg:mt-8 lg:flex-row lg:items-center lg:gap-0 lg:rounded-full lg:bg-white lg:p-1.5 lg:shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
           >
-            {/* Location */}
-            <div className="relative min-w-0 flex-1 lg:border-r lg:border-gray-200">
-              <select
-                aria-label="Location"
+            {/* Location Input with MapPin Icon */}
+            <div className="relative min-w-0 flex-1 lg:border-r lg:border-gray-200 flex items-center">
+              <MapPin className="absolute left-3.5 h-4 w-4 text-gray-400 lg:left-4" />
+              <input
+                type="text"
+                placeholder="Search by location (e.g. Ahmedabad)..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className={selectClass}
-              >
-                <option value="">All Location</option>
-                <option value="Ahmedabad">Ahmedabad</option>
-                <option value="Viramgam">Viramgam</option>
-                <option value="Surat">Surat</option>
-                <option value="Rajkot">Rajkot</option>
-                <option value="Vadodara">Vadodara</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 lg:right-4" />
+                className="h-[48px] w-full rounded-xl bg-white pl-10 pr-4 text-sm font-medium text-[#2a2d34] outline-none transition placeholder:text-gray-400 focus:ring-2 focus:ring-[#d8b46a] lg:h-[50px] lg:rounded-none lg:bg-transparent lg:pl-10 lg:pr-5 lg:focus:ring-0"
+              />
             </div>
 
-            {/* Property Type */}
+            {/* Property Type Dropdown */}
             <div className="relative min-w-0 flex-1 lg:border-r lg:border-gray-200">
               <select
                 aria-label="Property type"
@@ -116,15 +111,16 @@ export default function Hero() {
                 onChange={(e) => setType(e.target.value)}
                 className={selectClass}
               >
-                <option value="">All Type</option>
+                <option value="">Property Type</option>
                 <option value="Residential">Residential</option>
                 <option value="Agricultural">Agricultural</option>
                 <option value="Commercial">Commercial</option>
+                <option value="Plot">Plot</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 lg:right-4" />
             </div>
 
-            {/* Budget */}
+            {/* Budget Dropdown */}
             <div className="relative min-w-0 flex-1">
               <select
                 aria-label="Budget"
@@ -132,7 +128,7 @@ export default function Hero() {
                 onChange={(e) => setBudget(e.target.value)}
                 className={selectClass}
               >
-                <option value="">Any Budget</option>
+                <option value="">Budget</option>
                 <option value="under-10-lakh">Under ₹10 Lakh</option>
                 <option value="10-25-lakh">₹10–25 Lakh</option>
                 <option value="25-50-lakh">₹25–50 Lakh</option>
@@ -150,40 +146,29 @@ export default function Hero() {
               <span>Search</span>
             </button>
           </form>
-        </div>
-      </div>
 
-      {/* Statistics */}
-      <div className="w-full border-t border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-2 gap-y-6 lg:grid-cols-4 lg:gap-y-0 lg:divide-x lg:divide-white/15">
-            {stats.map(({ value, label, Icon }, index) => (
-              <div
-                key={label}
-                className={`flex items-center gap-3.5 sm:gap-4 ${
-                  index % 2 === 1 ? "pl-4 sm:pl-8 lg:pl-8" : "pr-2 lg:px-8"
-                } ${
-                  index >= 2
-                    ? "border-t border-white/10 pt-4 lg:border-t-0 lg:pt-0"
-                    : ""
-                }`}
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFD16D]/10 text-[#FFD16D] sm:h-12 sm:w-12">
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.8} />
-                </div>
+          {/* Feature Badges below Search */}
+          <div className="mt-5 flex flex-wrap items-center gap-6 text-xs font-semibold text-gray-300 sm:text-sm">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[#ffd77f]">
+                <ShieldCheck className="h-3.5 w-3.5" />
+              </span>
+              <span>Trusted &amp; Secure</span>
+            </div>
 
-                <div className="min-w-0">
-                  <p className="font-serif text-2xl font-bold leading-none text-white sm:text-3xl lg:text-[28px]">
-                    <span className="bg-gradient-to-r from-[#FFE59A] to-[#FFD77F] bg-clip-text text-transparent">
-                      {value}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs font-medium text-gray-300 sm:text-sm">
-                    {label}
-                  </p>
-                </div>
-              </div>
-            ))}
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[#ffd77f]">
+                <Handshake className="h-3.5 w-3.5" />
+              </span>
+              <span>Verified Properties</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[#ffd77f]">
+                <Headphones className="h-3.5 w-3.5" />
+              </span>
+              <span>24/7 Support</span>
+            </div>
           </div>
         </div>
       </div>

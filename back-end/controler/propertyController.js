@@ -414,3 +414,81 @@ export const getMyProperties = async (req, res) => {
     });
   }
 };
+
+
+
+// ADMIN: GET ALL PROPERTIES
+// GET /api/property/admin/all
+export const getAllProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({})
+      .select("+aadhaarNo +panNo +aadhaarPhoto +panPhoto +propertyLegalDocs")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: properties.length,
+      properties,
+    });
+  } catch (error) {
+    console.error("Get All Properties Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch all properties.",
+    });
+  }
+};
+
+
+
+
+// ADMIN: UPDATE APPROVED PROPERTY PRICE AND MARK AS SOLD OUT
+// PATCH /api/property/admin/:id/sold-out
+
+export const updateApprovedProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { price } = req.body;
+
+    const newPrice = parsePrice(price);
+
+    if (!Number.isFinite(newPrice) || newPrice <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid price greater than zero.",
+      });
+    }
+
+    const property = await Property.findOneAndUpdate(
+      { _id: id, status: "Approved" },
+      {
+        $set: {
+          price: newPrice,
+          status: "Sold Out",
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Approved property not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Price updated and property marked as Sold Out.",
+      property,
+    });
+  } catch (error) {
+    console.error("Update Approved Property Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update property.",
+    });
+  }
+};

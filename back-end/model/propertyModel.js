@@ -207,7 +207,7 @@ const propertySchema = new mongoose.Schema(
     // Approval Workflow
     status: {
       type: String,
-      enum: ["Processing", "Approved", "Rejected"],
+      enum: ["Processing", "Approved", "Rejected" , "Sold Out"],
       default: "Processing",
       index: true,
     },

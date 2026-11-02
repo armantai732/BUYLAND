@@ -1,83 +1,98 @@
 import React from "react";
-import {
-  Home,
-  Sprout,
-  Building2,
-  Factory,
-  Trees,
-  TrendingUp,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   {
     id: 1,
-    title: "Residential Land",
-    Icon: Home,
+    title: "Residential Plots",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 2,
     title: "Agricultural Land",
-    Icon: Sprout,
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 3,
     title: "Commercial Land",
-    Icon: Building2,
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=400&auto=format&fit=crop",
   },
   {
     id: 4,
     title: "Industrial Land",
-    Icon: Factory,
-  }
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop",
+  },
+  {
+    id: 5,
+    title: "Investment Land",
+    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=400&auto=format&fit=crop",
+  },
 ];
 
 export default function LandCategories() {
+  const navigate = useNavigate();
+
   return (
-    <section className="w-full bg-[#061517] py-12 sm:py-20 text-white font-sans">
-      <div className="mx-auto max-w-7xl px-3 sm:px-8 lg:px-12">
+    <section className="w-full bg-[#fbf9f5] py-12 sm:py-16 text-gray-900 font-sans">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         
-        {/* Header Section */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-white sm:text-5xl">
-              Land Categories
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          {/* Left Header Section (Col 4) */}
+          <div className="lg:col-span-4 space-y-4">
+            {/* Small Gold Tag with Line */}
+            <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#b88c3a] uppercase">
+              <span className="h-[2px] w-6 bg-[#b88c3a]" />
+              <span>Land Categories</span>
+            </div>
+
+            {/* Main Title */}
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+              Explore Land Categories
             </h2>
-            <p className="mt-2 text-xs text-gray-400 font-light sm:text-sm">
-              Choose from a wide range of land types based on your needs.
+            <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">
+              Find the perfect property as per your needs.
             </p>
+
+            {/* View All Categories Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => navigate("/properties")}
+                className="inline-flex items-center gap-2 rounded-full bg-[#b88c3a] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition-all hover:bg-[#a17730] active:scale-[0.98]"
+              >
+                <span>View All Categories</span>
+                <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+              </button>
+            </div>
           </div>
 
-          {/* View All Categories Button */}
-          {/* <div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] px-5 py-2.5 text-xs font-bold text-[#30230c] shadow-md transition-all hover:brightness-105 active:scale-[0.98] sm:text-sm"
-            >
-              <span>View All Categories</span>
-              <ArrowRight className="h-4 w-4 stroke-[2.5]" />
-            </button>
-          </div> */}
-        </div>
+          {/* Right Cards Grid (Col 8) */}
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {categories.map(({ id, title, image }) => (
+              <div
+                key={id}
+                onClick={() => navigate(`/properties?category=${encodeURIComponent(title)}`)}
+                className="group relative flex flex-col items-center rounded-2xl bg-white border border-gray-200/80 p-3 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl cursor-pointer"
+              >
+                {/* Image Container */}
+                <div className="relative h-32 w-full overflow-hidden rounded-xl">
+                  <img
+                    src={image}
+                    alt={title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
 
-        {/* Categories Cards Grid (Mobile: 2 Columns - grid-cols-2) */}
-        <div className="mt-8 grid grid-cols-2 gap-3 md:flex justify-center sm:gap-6 md:grid-cols-3 lg:grid-cols-6">
-          {categories.map(({ id, title, Icon }) => (
-            <div
-              key={id}
-              className="group relative flex flex-col items-center justify-center rounded-2xl border border-[#d8b46a]/40 bg-[#0c2225]/60 p-6 sm:p-8 text-center backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffd77f] hover:bg-[#102d31] hover:shadow-[0_0_25px_rgba(216,180,106,0.2)] cursor-pointer"
-            >
-              {/* Golden Icon */}
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-[#d8b46a]/10 text-[#ffd77f] transition-transform duration-300 group-hover:scale-110">
-                <Icon className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={1.7} />
+                {/* Title */}
+                <h3 className="mt-3 text-center font-serif text-xs sm:text-sm font-bold text-gray-900 transition-colors group-hover:text-[#b88c3a]">
+                  {title}
+                </h3>
               </div>
+            ))}
+          </div>
 
-              {/* Title */}
-              <h3 className="mt-4 font-serif text-xs sm:text-sm font-semibold text-white tracking-wide transition-colors group-hover:text-[#ffd77f]">
-                {title}
-              </h3>
-            </div>
-          ))}
         </div>
 
       </div>

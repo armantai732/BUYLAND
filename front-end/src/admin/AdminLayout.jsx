@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AdminHeader from "./components/AdminHeader";
 import AdminSidebar from "./components/AdminSidebar";
-
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -21,12 +21,10 @@ export default function AdminLayout() {
     return "Admin Dashboard";
   };
 
-  // Close mobile sidebar after route changes
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  // Prevent background scrolling while mobile sidebar is open
   useEffect(() => {
     if (!sidebarOpen) return;
 
@@ -39,13 +37,19 @@ export default function AdminLayout() {
   }, [sidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] md:flex">
-      <AdminSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+    <div className="min-h-screen bg-[#f8f9fa]">
 
-      <div className="min-w-0 flex-1">
+      {/* Fixed Sidebar */}
+      <div className="fixed inset-y-0 left-0 z-50">
+        <AdminSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="min-w-0 md:pl-8 md:ml-64">
+
         <AdminHeader
           activeTab={getActiveTab()}
           onMenuClick={() => setSidebarOpen(true)}
@@ -54,6 +58,7 @@ export default function AdminLayout() {
         <main className="min-w-0">
           <Outlet />
         </main>
+
       </div>
     </div>
   );

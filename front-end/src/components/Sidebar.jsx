@@ -1,134 +1,155 @@
-
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
-    LayoutDashboard,
-    User,
-    Heart,
-    MessageSquare,
-    Settings,
-    LogOut,
+  LayoutDashboard,
+  User,
+  Building2,
+  Heart,
+  MessageSquare,
+  Settings,
+  LogOut,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { getMyProfile } from "../api/api";
 
-export default function Sidebar({ activeTab, setActiveTab }) {
-    const navigate = useNavigate();
+const sidebarLinks = [
+  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "My Profile", path: "/profile", icon: User },
+  { name: "My Properties", path: "/my-properties", icon: Building2 },
+  { name: "Wishlist", path: "/wishlist", icon: Heart },
+  { name: "Messages", path: "/messages", icon: MessageSquare, badge: 2 },
+  { name: "Settings", path: "/settings", icon: Settings },
+];
 
-    const [profile, setProfile] = useState({
-        name: "",
-        email: "",
-    });
+function HouseLogo() {
+  return (
+    <svg
+      viewBox="0 0 58 58"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-12 w-12 shrink-0"
+      aria-label="BuyLand house logo"
+    >
+      <path
+        d="M5 27L29 4L53 27V52H5V27Z"
+        stroke="#F5D58A"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 28L29 12L46 28V46H12V28Z"
+        stroke="#D7B66B"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M21 45V32L29 26L37 32V45"
+        stroke="#F5D58A"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M26 45V37H32V45"
+        stroke="#F5D58A"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
 
-    const [loading, setLoading] = useState(true);
+export default function Sidebar() {
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        let cancelled = false;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("authChange"));
+    navigate("/login");
+  };
 
-        const loadProfile = async () => {
-            try {
-                setLoading(true);
+  return (
+    <aside className="flex flex-col justify-between w-72 min-h-screen bg-[#07111d] px-6 py-8 text-white border-r border-slate-800 font-sans shadow-xl">
+      
+      {/* TOP SECTION: BRAND & LINKS */}
+      <div className="space-y-8">
+        
+        {/* Brand Logo & Title */}
+        <div 
+          onClick={() => navigate("/")}
+          className="flex flex-col items-center text-center cursor-pointer group"
+        >
+          <HouseLogo />
+          <span className="font-serif text-2xl font-extrabold tracking-tight text-[#F5D58A] mt-2">
+            BuyLand
+          </span>
+          <span className="text-[10px] font-medium tracking-wider text-slate-400">
+            Find Your Dream Land
+          </span>
+        </div>
 
-                // Profile directly from MongoDB through backend
-                const data = await getMyProfile();
-
-                if (!cancelled && data.success && data.user) {
-                    setProfile({
-                        name: data.user.name || "",
-                        email: data.user.email || "",
-                    });
+        {/* Navigation Links */}
+        <nav className="space-y-2">
+          {sidebarLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <NavLink
+                key={link.name}
+                to={link.path}
+                className={({ isActive }) =>
+                  `flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#F5D58A] to-[#e4c372] text-[#07111d] shadow-md font-bold"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`
                 }
-            } catch (error) {
-                console.error("Profile fetch failed:", error.message);
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        };
+              >
+                {({ isActive }) => (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <Icon size={20} className={isActive ? "text-[#07111d]" : "text-[#F5D58A]"} />
+                      <span>{link.name}</span>
+                    </div>
 
-        loadProfile();
+                    {link.badge && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow">
+                        {link.badge}
+                      </span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
 
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
+          >
+            <LogOut size={20} className="text-red-400" />
+            <span>Logout</span>
+          </button>
+        </nav>
+      </div>
 
-    const menuItems = [
-        { name: "Dashboard", icon: LayoutDashboard },
-        { name: "My Wishlist", icon: Heart },
-        { name: "Messages", icon: MessageSquare },
-        { name: "Settings", icon: Settings },
-    ];
+      {/* BOTTOM SECTION: TRUSTED PARTNER CARD */}
+      <div className="mt-8 rounded-2xl border border-amber-400/30 bg-gradient-to-b from-[#0e1d30] to-[#07111d] p-4 text-center shadow-lg relative overflow-hidden">
+        
+        {/* Skyline Golden Illustration / Icon */}
+        <div className="flex justify-center mb-2 text-[#F5D58A]">
+          <svg viewBox="0 0 120 40" className="w-28 h-10 fill-current opacity-80" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 40V20h5v20h5V15h6v25h4V10h8v30h6V5h8v35h5V25h6v15h7V18h6v22h8V35h5v5H10z" />
+          </svg>
+        </div>
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("user");
+        <h4 className="font-serif text-xs font-bold text-[#F5D58A] tracking-wide">
+          Your Trusted
+        </h4>
+        <h3 className="font-serif text-sm font-extrabold text-white tracking-wide mt-0.5">
+          Real Estate Partner
+        </h3>
+        
+        <p className="mt-2 text-[11px] font-medium text-amber-200/80 tracking-wider">
+          Buy • Sell • Invest
+        </p>
+      </div>
 
-        window.dispatchEvent(new Event("authChange"));
-        navigate("/login", { replace: true });
-    };
-
-    return (
-        <aside className="w-full bg-[#090b0c] p-4 text-white sm:p-6 md:min-h-screen md:border-r md:border-white/10">
-            {/* Database User Profile */}
-            <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-[#ffd77f] bg-white/10 text-lg font-bold text-[#ffd77f]">
-                    {profile.name
-                        ? profile.name.charAt(0).toUpperCase()
-                        : "U"}
-                </div>
-
-                <div className="min-w-0">
-                    <h3 className="truncate font-serif text-sm font-bold text-white">
-                        {loading
-                            ? "Loading..."
-                            : profile.name || "User not found"}
-                    </h3>
-
-                    <p className="truncate text-xs text-gray-400">
-                        {profile.email || "User not found"}
-                    </p>
-                </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="grid grid-cols-2 gap-4 md:flex md:flex-col">
-                {menuItems.map(({ name, icon: Icon }) => {
-                    const isActive = activeTab === name;
-
-                    return (
-                        <button
-                            key={name}
-                            type="button"
-                            onClick={() => setActiveTab(name)}
-                            aria-current={isActive ? "page" : undefined}
-                            className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-3 text-left text-xs transition-all sm:gap-3 sm:px-4 sm:text-sm ${isActive
-                                    ? "bg-gradient-to-r from-[#e5ba73] to-[#ffe59a] font-bold text-[#30230c] shadow-md"
-                                    : "bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
-                                }`}
-                        >
-                            <Icon
-                                className={`h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${isActive
-                                        ? "text-[#30230c]"
-                                        : "text-[#ffd77f]"
-                                    }`}
-                            />
-                            <span className="truncate">{name}</span>
-                        </button>
-                    );
-                })}
-
-                {/* Logout */}
-                <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex min-w-0 items-center gap-2 rounded-xl bg-red-500/10 px-3 py-3 text-left text-xs text-red-400 transition hover:bg-red-500/20 sm:gap-3 sm:px-4 sm:text-sm md:mt-4"
-                >
-                    <LogOut className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                    <span>Logout</span>
-                </button>
-            </nav>
-        </aside>
-    );
+    </aside>
+  );
 }

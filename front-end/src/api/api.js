@@ -1,10 +1,10 @@
 
-// const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
-// ).replace(/\/+$/, "");
-
-
-const BASE_URL = ("http://localhost:8080"
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
 ).replace(/\/+$/, "");
+
+
+// const BASE_URL = ("http://localhost:8080"
+// ).replace(/\/+$/, "");
 
 const API_URL = BASE_URL.endsWith("/api")
     ? BASE_URL
@@ -205,10 +205,10 @@ export const createProperty = async (propertyData) => {
 
 
 
-export const getProcessingProperties = async () => {
+export const getAllProperties = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(`${API_URL}/property/admin/processing`, {
+    const response = await fetch(`${API_URL}/property/admin/all`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -220,6 +220,94 @@ export const getProcessingProperties = async () => {
 
     if (!response.ok) {
         throw new Error(data.message || "Failed to fetch properties");
+    }
+
+    return data;
+};
+
+
+export const approvePropertyAPI = async (id, data) => {
+    const response = await fetch(
+        `${API_URL}/property/admin/${id}/approve`,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(data),
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || "Failed to approve property");
+    }
+
+    return result;
+};
+
+
+
+// ADMIN: UPDATE PRICE AND MARK PROPERTY SOLD OUT
+export const updateApprovedPropertyAPI = async (id, price) => {
+    const response = await fetch(`${API_URL}/property/admin/${id}/sold-out`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ price }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to update property.");
+    }
+
+    return data;
+};
+
+
+
+export const getAllUsersAPI = async () => {
+    const response = await fetch(`${API_URL}/auth/admin/users`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch users");
+    }
+
+    return data;
+};
+
+
+
+export const updateUserAPI = async (id, userData) => {
+    const response = await fetch(
+        `${API_URL}/auth/admin/users/${id}`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(userData),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to update user");
     }
 
     return data;

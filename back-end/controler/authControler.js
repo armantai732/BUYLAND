@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import Auth from "../model/authMdel.js";
 import jwt from 'jsonwebtoken'
+import Property from "../model/propertyModel.js";
 
 export const registerController = async (req, res) => {
     try {
@@ -219,4 +220,134 @@ export const getMyProfileController = async (req, res) => {
             message: "Failed to fetch profile",
         });
     }
+};
+
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await Auth.find()
+      .select("-password -secretKey")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const usersWithPropertyCount = await Promise.all(
+      users.map(async (user) => {
+        const totalProperties = await Property.countDocuments({
+          seller: user._id,
+        });
+
+        return {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.mobileNumber,
+          role: user.role,
+          status: user.status || "Active",
+          joinedOn: user.createdAt,
+          totalProperties,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      totalUsers: usersWithPropertyCount.length,
+      users: usersWithPropertyCount,
+    });
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+      error: error.message,
+    });
+  }
+};
+
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, status } = req.body;
+
+    const allowedRoles = [
+      "user",
+      "owner",
+      "agent",
+      "builder",
+      "investor",
+      "admin",
+    ];
+
+    const allowedStatuses = ["Active", "Suspended"];
+
+    // Check user ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    // Check whether at least one field is provided
+    if (role === undefined && status === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide role or status",
+      });
+    }
+
+    // Validate role
+    if (role !== undefined && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user role",
+      });
+    }
+
+    // Validate status
+    if (status !== undefined && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user status",
+      });
+    }
+
+    const user = await Auth.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update only provided fields
+    if (role !== undefined) user.role = role;
+    if (status !== undefined) user.status = status;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.mobileNumber,
+        role: user.role,
+        status: user.status,
+      },
+    });
+  } catch (error) {
+    console.error("Update User Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update user",
+      error: error.message,
+    });
+  }
 };

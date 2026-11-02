@@ -1,361 +1,424 @@
 import React, { useState } from "react";
 import {
-  Building2,
-  Users,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  XCircle,
+  Search,
+  Bell,
+  ChevronDown,
   Home,
-  Eye,
-  X,
+  Users,
+  IndianRupee,
+  Crown,
+  TrendingUp,
+  PieChart,
+  PlusCircle,
+  UserCheck,
+  BarChart3,
+  Settings,
   MapPin,
-  Maximize2,
-  Compass,
-  Phone,
-  User,
-  ExternalLink,
+  Eye,
+  Heart,
+  ArrowRight,
+  Building2
 } from "lucide-react";
 
 export default function AdminOverview() {
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedTimeframe, setSelectedTimeframe] = useState("Last 6 Months");
 
+  // Stat cards data matching screenshot
   const stats = [
-    { title: "Total Properties", value: "1,240", icon: Home, change: "+12% this month" },
-    { title: "Active Users", value: "8,540", icon: Users, change: "+240 new today" },
-    { title: "Pending Approvals", value: "18", icon: Clock, change: "Requires action" },
-    { title: "Total Revenue", value: "₹ 45,20,000", icon: DollarSign, change: "+18% growth" },
+    {
+      title: "Total Properties",
+      value: "1,248",
+      change: "+12.5%",
+      icon: Home,
+    },
+    {
+      title: "Total Users",
+      value: "8,742",
+      change: "+8.3%",
+      icon: Users,
+    },
+    {
+      title: "Profit",
+      value: "₹4,85,230",
+      change: "+15.7%",
+      icon: IndianRupee,
+    }
   ];
 
-  const pendingListings = [
+  // Property status doughnut chart legend items
+  const propertyStatuses = [
+    { label: "Approved", count: 720, percentage: "57.7%", color: "bg-emerald-500" },
+    { label: "Processing", count: 312, percentage: "25.0%", color: "bg-amber-400" },
+    { label: "Rejected", count: 104, percentage: "8.3%", color: "bg-rose-500" },
+    { label: "Sold Out", count: 112, percentage: "9.0%", color: "bg-slate-600" },
+  ];
+
+  // Recent properties listing matching screenshot
+  const recentProperties = [
     {
       id: 1,
-      title: "Commercial Plot near SG Highway",
-      owner: "Ramesh Patel",
-      phone: "+91 98765 43210",
-      email: "ramesh@gmail.com",
-      type: "Commercial Plot",
-      price: "₹ 85,00,000",
-      area: "2400 sq. yd",
-      facing: "East Facing",
-      naStatus: "NA Approved",
-      location: "SG Highway, Ahmedabad, Gujarat",
-      mapLink: "https://maps.google.com/?q=SG+Highway+Ahmedabad",
-      date: "28 Oct 2026",
-      description:
-        "Prime commercial land touch with 60ft main road. Ideal for showroom, office complex or commercial tower development with full clear title.",
+      title: "Luxury Villa in Ahmedabad",
+      price: "₹1.25 Cr",
+      location: "Ahmedabad",
+      views: "2.5K",
+      status: "Approved",
+      statusColor: "bg-emerald-100 text-emerald-700 border-emerald-300",
+      image:
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=600&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      title: "Premium Plot in SG Highway",
+      price: "₹85 Lakh",
+      location: "Ahmedabad",
+      views: "1.8K",
+      status: "Processing",
+      statusColor: "bg-amber-100 text-amber-700 border-amber-300",
       image:
         "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop",
     },
     {
-      id: 2,
-      title: "Agricultural Land in Mehsana",
-      owner: "Suresh Joshi",
-      phone: "+91 98123 45678",
-      email: "suresh.j@gmail.com",
-      type: "Agricultural Land",
-      price: "₹ 28,00,000",
-      area: "5 Bigha",
-      facing: "North-East Facing",
-      naStatus: "Agricultural (Old Tenure)",
-      location: "Unjha Road, Mehsana, Gujarat",
-      mapLink: "https://maps.google.com/?q=Mehsana+Gujarat",
-      date: "27 Oct 2026",
-      description:
-        "Fertile agricultural land with tubewell water supply and electricity connection. Direct access from district main road.",
+      id: 3,
+      title: "2 BHK Apartment",
+      price: "₹72 Lakh",
+      location: "Ahmedabad",
+      views: "1.2K",
+      status: "Approved",
+      statusColor: "bg-emerald-100 text-emerald-700 border-emerald-300",
       image:
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=600&auto=format&fit=crop",
     },
   ];
 
-  const handleApprove = (id) => {
-    alert(`Property ID #${id} Approved Successfully!`);
-    setSelectedProperty(null);
-  };
-
-  const handleReject = (id) => {
-    alert(`Property ID #${id} Rejected!`);
-    setSelectedProperty(null);
-  };
-
   return (
-    <div className="flex-1 bg-[#fbf9f5]  overflow-y-auto p-4 sm:p-6 lg:p-10 text-gray-900 font-sans">
-      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+    <div className="min-h-screen flex-1 bg-[#f8f9fa] p-4 sm:p-6 lg:p-8 text-gray-800 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Page Title & Welcome */}
-        <div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
-            Admin Overview
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-gray-600 font-medium flex items-center gap-1.5">
-            <span>Welcome back, System Administrator</span>
-            <span>🚀</span>
-          </p>
+  
+
+        {/* HERO BANNER CARD */}
+        <div className="relative overflow-hidden rounded-3xl bg-white shadow-sm border border-gray-100 p-6 sm:p-8">
+          <div className="relative z-10 max-w-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl">👋</span>
+              <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                Welcome Back, Admin!
+              </h1>
+            </div>
+            <p className="mt-2 text-xs sm:text-sm text-gray-500 font-medium">
+              Here's what's happening with your real estate platform today.
+            </p>
+          </div>
+
+          {/* Background House Banner */}
+          <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden md:block">
+            <img
+              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop"
+              alt="Luxury modern house"
+              className="h-full w-full object-cover object-left mask-linear-gradient"
+              style={{
+                maskImage: "linear-gradient(to right, transparent, black 40%)",
+                WebkitMaskImage: "linear-gradient(to right, transparent, black 40%)",
+              }}
+            />
+          </div>
         </div>
 
-        {/* 4 Stats Cards Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* 4 STATS CARDS GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
             return (
               <div
                 key={idx}
-                className="rounded-2xl bg-white p-4 sm:p-5 shadow-sm border border-amber-100 flex flex-col justify-between"
+                className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-gray-100 flex items-center gap-4 transition hover:shadow-md"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-semibold text-gray-500">
-                    {stat.title}
-                  </span>
-                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-amber-50 text-[#b88c3a]">
-                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </div>
+                {/* Gold Circle Badge Icon */}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-white shadow-sm">
+                  <Icon className="h-6 w-6" />
                 </div>
-                <div className="mt-3 sm:mt-4">
-                  <span className="font-serif text-xl sm:text-3xl font-extrabold text-gray-900">
+
+                {/* Content */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500">{stat.title}</p>
+                  <h3 className="text-xl font-extrabold text-gray-900 mt-0.5 font-serif">
                     {stat.value}
+                  </h3>
+                  <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-emerald-600">
+                    <span>↑</span> {stat.change}
                   </span>
-                  <p className="mt-0.5 text-[10px] sm:text-[11px] text-gray-400 font-medium">
-                    {stat.change}
-                  </p>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Pending Property Approvals Section */}
-        <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-amber-100 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
-            <h2 className="font-serif text-base sm:text-lg font-bold text-gray-900">
-              Pending Property Approvals
-            </h2>
-            <span className="inline-flex w-fit rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-[#b88c3a]">
-              18 Pending
-            </span>
+        {/* CHARTS SECTION (2 COLUMNS) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Revenue Overview (Line Chart) */}
+          <div className="lg:col-span-2 rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-50">
+              <div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-amber-500" />
+                  <h2 className="font-serif text-base font-bold text-gray-900">
+                    Profit Overview
+                  </h2>
+                </div>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-gray-900 font-serif">
+                    ₹4,85,230
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600">
+                    ↑ +15.7%
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-400 font-medium">Total Profit</p>
+              </div>
+
+              {/* Timeframe Selector Dropdown */}
+              <div className="relative">
+                <select
+                  value={selectedTimeframe}
+                  onChange={(e) => setSelectedTimeframe(e.target.value)}
+                  className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 outline-none cursor-pointer"
+                >
+                  <option>Last 6 Months</option>
+                  <option>Last Year</option>
+                  <option>This Month</option>
+                </select>
+              </div>
+            </div>
+
+            {/* SVG Line Chart Representation */}
+            <div className="mt-6 h-48 w-full">
+              <svg className="h-full w-full overflow-visible" viewBox="0 0 500 150">
+                {/* Grid Lines */}
+                <line x1="0" y1="30" x2="500" y2="30" stroke="#f1f5f9" strokeDasharray="4" />
+                <line x1="0" y1="70" x2="500" y2="70" stroke="#f1f5f9" strokeDasharray="4" />
+                <line x1="0" y1="110" x2="500" y2="110" stroke="#f1f5f9" strokeDasharray="4" />
+
+                {/* Y Axis Labels */}
+                <text x="0" y="25" fill="#94a3b8" fontSize="10">5L</text>
+                <text x="0" y="65" fill="#94a3b8" fontSize="10">3L</text>
+                <text x="0" y="105" fill="#94a3b8" fontSize="10">1L</text>
+
+                {/* Line Path */}
+                <path
+                  d="M 30,110 L 110,85 L 190,70 L 270,88 L 350,55 L 430,40"
+                  fill="none"
+                  stroke="#d97706"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+
+                {/* Data Points */}
+                {[[30, 110], [110, 85], [190, 70], [270, 88], [350, 55], [430, 40]].map(([x, y], i) => (
+                  <circle key={i} cx={x} cy={y} r="4" fill="#d97706" stroke="#ffffff" strokeWidth="2" />
+                ))}
+
+                {/* X Axis Labels */}
+                <text x="25" y="145" fill="#64748b" fontSize="11">May</text>
+                <text x="105" y="145" fill="#64748b" fontSize="11">Jun</text>
+                <text x="185" y="145" fill="#64748b" fontSize="11">Jul</text>
+                <text x="265" y="145" fill="#64748b" fontSize="11">Aug</text>
+                <text x="345" y="145" fill="#64748b" fontSize="11">Sep</text>
+                <text x="425" y="145" fill="#64748b" fontSize="11">Oct</text>
+              </svg>
+            </div>
           </div>
 
-          {/* List items */}
-          <div className="space-y-3">
-            {pendingListings.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-2xl bg-gray-50/80 border border-gray-100 transition hover:shadow-md"
-              >
-                {/* Property Info */}
-                <div className="flex items-center gap-3.5">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-16 w-20 sm:h-16 sm:w-20 rounded-xl object-cover shrink-0 border border-gray-200"
+          {/* Property Status (Doughnut Chart) */}
+          <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div className="flex items-center gap-2 pb-3 border-b border-gray-50">
+              <PieChart className="h-4 w-4 text-amber-500" />
+              <h2 className="font-serif text-base font-bold text-gray-900">
+                Property Status
+              </h2>
+            </div>
+
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-6">
+              {/* Donut Chart SVG */}
+              <div className="relative flex items-center justify-center h-36 w-36 shrink-0">
+                <svg className="h-full w-full transform -rotate-90" viewBox="0 0 36 36">
+                  {/* Background Circle */}
+                  <path
+                    className="text-gray-100"
+                    strokeWidth="4"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
-                  <div>
-                    <h4 className="font-serif text-xs sm:text-sm font-bold text-gray-900 line-clamp-1">
-                      {item.title}
-                    </h4>
-                    <p className="mt-0.5 text-[11px] sm:text-xs text-gray-500">
-                      Owner:{" "}
-                      <span className="font-semibold text-gray-700">
-                        {item.owner}
-                      </span>
-                    </p>
-                    <p className="text-[11px] sm:text-xs text-gray-500">
-                      Type:{" "}
-                      <span className="font-semibold text-gray-700">
-                        {item.type}
-                      </span>{" "}
-                      | Price:{" "}
-                      <span className="font-bold text-[#b88c3a]">
-                        {item.price}
-                      </span>
-                    </p>
-                  </div>
-                </div>
+                  {/* Approved 57.7% */}
+                  <path
+                    className="text-emerald-500"
+                    strokeDasharray="57.7, 100"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  {/* Processing 25% */}
+                  <path
+                    className="text-amber-400"
+                    strokeDasharray="25, 100"
+                    strokeDashoffset="-57.7"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
 
-                {/* Actions: View Details, Approve & Reject */}
-                <div className="flex items-center gap-2 justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200">
-                  {/* View Details Button */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedProperty(item)}
-                    className="flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 shadow-sm transition hover:bg-amber-50 hover:border-[#d8b46a] hover:text-[#b88c3a] active:scale-95"
-                  >
-                    <Eye className="h-3.5 w-3.5 text-[#b88c3a]" />
-                    <span>View Details</span>
-                  </button>
-
-                  {/* Approve */}
-                  <button
-                    type="button"
-                    onClick={() => handleApprove(item.id)}
-                    className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 transition active:scale-95"
-                  >
-                    <CheckCircle className="h-3.5 w-3.5" />
-                    <span>Approve</span>
-                  </button>
-
-                  {/* Reject */}
-                  <button
-                    type="button"
-                    onClick={() => handleReject(item.id)}
-                    className="flex items-center gap-1 rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-red-700 transition active:scale-95"
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    <span>Reject</span>
-                  </button>
+                {/* Center Total Count */}
+                <div className="absolute text-center">
+                  <span className="block text-base font-extrabold text-gray-900 leading-tight">
+                    1,248
+                  </span>
+                  <span className="block text-[10px] text-gray-400 font-medium">
+                    Total
+                  </span>
                 </div>
               </div>
-            ))}
+
+              {/* Status Legends */}
+              <div className="w-full space-y-2">
+                {propertyStatuses.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
+                      <span className="font-medium text-gray-600">
+                        {item.label} <span className="text-gray-400">({item.count})</span>
+                      </span>
+                    </div>
+                    <span className="font-bold text-gray-800">{item.percentage}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
+        </div>
+
+        {/* BOTTOM SECTION: RECENT PROPERTIES & QUICK ACTIONS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Recent Properties Grid (2 Cols wide) */}
+          <div className="lg:col-span-2 rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-50 pb-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-amber-500" />
+                <h2 className="font-serif text-base font-bold text-gray-900">
+                  Recent Properties
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 transition"
+              >
+                <span>View All</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {recentProperties.map((prop) => (
+                <div
+                  key={prop.id}
+                  className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                >
+                  <div className="relative h-32 w-full overflow-hidden">
+                    <img
+                      src={prop.image}
+                      alt={prop.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+
+                    {/* Status Badge */}
+                    <span
+                      className={`absolute top-2 left-2 rounded-md border px-2 py-0.5 text-[10px] font-bold shadow-sm backdrop-blur-md ${prop.statusColor}`}
+                    >
+                      {prop.status}
+                    </span>
+
+                    {/* Heart Action Icon */}
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-gray-600 backdrop-blur-md hover:text-rose-500"
+                    >
+                      <Heart className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="p-3">
+                    <h4 className="font-serif text-xs font-bold text-gray-900 truncate">
+                      {prop.title}
+                    </h4>
+
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-amber-600">
+                        {prop.price}
+                      </span>
+                      <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                        <Eye className="h-3 w-3" />
+                        <span>{prop.views}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-400">
+                      <MapPin className="h-3 w-3 text-gray-400" />
+                      <span>{prop.location}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions (1 Col wide) */}
+          <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="flex items-center gap-2 border-b border-gray-50 pb-3">
+              <span className="text-amber-500 text-base">⚡</span>
+              <h2 className="font-serif text-base font-bold text-gray-900">
+                Quick Actions
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                className="flex flex-col items-center justify-center gap-2 rounded-xl bg-gray-50 border border-gray-100 p-4 transition hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 active:scale-95"
+              >
+                <PlusCircle className="h-6 w-6 text-gray-700" />
+                <span className="text-xs font-semibold text-gray-700">Add Property</span>
+              </button>
+
+              <button
+                type="button"
+                className="flex flex-col items-center justify-center gap-2 rounded-xl bg-gray-50 border border-gray-100 p-4 transition hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 active:scale-95"
+              >
+                <UserCheck className="h-6 w-6 text-gray-700" />
+                <span className="text-xs font-semibold text-gray-700">Manage Users</span>
+              </button>
+
+
+              <button
+                type="button"
+                className="flex flex-col items-center justify-center gap-2 rounded-xl bg-gray-50 border border-gray-100 p-4 transition hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 active:scale-95"
+              >
+                <Settings className="h-6 w-6 text-gray-700" />
+                <span className="text-xs font-semibold text-gray-700">Site Settings</span>
+              </button>
+            </div>
+          </div>
+
         </div>
 
       </div>
-
-      {/* ================= PROPERTY FULL DETAILS MODAL POPUP ================= */}
-      {selectedProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-amber-100 max-h-[90vh] overflow-y-auto font-sans text-gray-900">
-            
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={() => setSelectedProperty(null)}
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-red-100 hover:text-red-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {/* Modal Title Header */}
-            <div className="border-b border-gray-100 pb-4">
-              <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-[#b88c3a] mb-1.5">
-                {selectedProperty.type}
-              </span>
-              <h2 className="font-serif text-xl sm:text-2xl font-bold text-gray-900">
-                {selectedProperty.title}
-              </h2>
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
-                <MapPin className="h-3.5 w-3.5 text-[#b88c3a]" />
-                <span>{selectedProperty.location}</span>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="mt-5 space-y-5">
-              {/* Image Preview */}
-              <div className="relative h-48 sm:h-64 w-full rounded-2xl overflow-hidden shadow-inner border border-gray-100">
-                <img
-                  src={selectedProperty.image}
-                  alt={selectedProperty.title}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md text-[#ffd77f] font-extrabold text-sm px-3.5 py-1.5 rounded-full shadow">
-                  {selectedProperty.price}
-                </div>
-              </div>
-
-              {/* Specifications Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 text-xs">
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase font-semibold">
-                    Area Size
-                  </span>
-                  <span className="font-bold text-gray-800">
-                    {selectedProperty.area}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase font-semibold">
-                    Facing
-                  </span>
-                  <span className="font-bold text-gray-800">
-                    {selectedProperty.facing}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase font-semibold">
-                    N.A. Status
-                  </span>
-                  <span className="font-bold text-emerald-700">
-                    {selectedProperty.naStatus}
-                  </span>
-                </div>
-              </div>
-
-              {/* Owner Contact Information */}
-              <div className="rounded-2xl bg-amber-50/60 p-4 border border-amber-200/50 space-y-2">
-                <h4 className="font-serif text-xs font-bold text-[#30230c] uppercase tracking-wider">
-                  Owner / Seller Contact Info
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-800">
-                  <div className="flex items-center gap-2">
-                    <User className="h-3.5 w-3.5 text-[#b88c3a]" />
-                    <span>Name: <strong>{selectedProperty.owner}</strong></span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-[#b88c3a]" />
-                    <span>Phone: <strong>{selectedProperty.phone}</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h4 className="font-serif text-xs font-bold text-gray-900 uppercase tracking-wider mb-1">
-                  Property Description
-                </h4>
-                <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  {selectedProperty.description}
-                </p>
-              </div>
-
-              {/* Google Maps Link */}
-              <div>
-                <a
-                  href={selectedProperty.mapLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#b88c3a] hover:underline"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span>Open Location in Google Maps</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Modal Footer Actions */}
-            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setSelectedProperty(null)}
-                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-100"
-              >
-                Close
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleReject(selectedProperty.id)}
-                className="flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-red-700"
-              >
-                <XCircle className="h-3.5 w-3.5" />
-                <span>Reject</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleApprove(selectedProperty.id)}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-emerald-700"
-              >
-                <CheckCircle className="h-3.5 w-3.5" />
-                <span>Approve Listing</span>
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

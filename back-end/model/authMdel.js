@@ -53,6 +53,11 @@ const authSchema = new mongoose.Schema(
       enum: ["local", "google"],
       default: "local",
     },
+    status: {
+      type: String,
+      enum: ["Active", "Suspended"],
+      default: "Active",
+    }
   },
   { timestamps: true }
 );
