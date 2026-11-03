@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   MapPin,
   Heart,
@@ -18,155 +18,10 @@ import {
   Award,
   Grid,
   List,
+  Loader2,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-const INITIAL_PROPERTIES = [
-  {
-    id: 1,
-    title: "Agricultural Land in Mehsana",
-    location: "Mehsana, Gujarat",
-    city: "Mehsana",
-    type: "Agricultural Land",
-    price: 3200000,
-    priceFormatted: "₹ 32,00,000",
-    sqydPrice: "5 Bigha",
-    area: "5 Bigha",
-    facing: "Agricultural",
-    posted: "Posted 3 days ago",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 2,
-    title: "Luxury Villa in Ahmedabad",
-    location: "Ahmedabad, Gujarat",
-    city: "Ahmedabad",
-    type: "Residential Plot",
-    price: 25000000,
-    priceFormatted: "₹ 2,50,00,000",
-    sqydPrice: "2500 Sq.Ft",
-    area: "2500 Sq.Ft",
-    facing: "Residential",
-    posted: "Posted today ago",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 3,
-    title: "Commercial Plot in Surat",
-    location: "Surat, Gujarat",
-    city: "Surat",
-    type: "Commercial Land",
-    price: 12500000,
-    priceFormatted: "₹ 1,25,00,000",
-    sqydPrice: "1800 Sq.Ft",
-    area: "1800 Sq.Ft",
-    facing: "Commercial",
-    posted: "Posted 5 days ago",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 4,
-    title: "Premium Land in Vadodara",
-    location: "Vadodara, Gujarat",
-    city: "Vadodara",
-    type: "Agricultural Land",
-    price: 4500000,
-    priceFormatted: "₹ 45,00,000",
-    sqydPrice: "2 Bigha",
-    area: "2 Bigha",
-    facing: "Agricultural",
-    posted: "Posted 2 days ago",
-    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=800&auto=format&fit=crop",
-    badge: "Featured",
-    badgeColor: "bg-rose-500 text-white",
-  },
-  {
-    id: 5,
-    title: "Residential Plot in Rajkot",
-    location: "Rajkot, Gujarat",
-    city: "Rajkot",
-    type: "Residential Plot",
-    price: 2800000,
-    priceFormatted: "₹ 28,00,000",
-    sqydPrice: "1200 Sq.Ft",
-    area: "1200 Sq.Ft",
-    facing: "Residential",
-    posted: "Posted 1 week ago",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 6,
-    title: "Modern House in Gandhinagar",
-    location: "Gandhinagar, Gujarat",
-    city: "Gandhinagar",
-    type: "Residential Plot",
-    price: 8500000,
-    priceFormatted: "₹ 85,00,000",
-    sqydPrice: "1800 Sq.Ft",
-    area: "1800 Sq.Ft",
-    facing: "Residential",
-    posted: "Posted today",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=800&auto=format&fit=crop",
-    badge: "Sold Out",
-    badgeColor: "bg-slate-700 text-white",
-  },
-  {
-    id: 7,
-    title: "Agricultural Land in Surat",
-    location: "Surat, Gujarat",
-    city: "Surat",
-    type: "Agricultural Land",
-    price: 1800000,
-    priceFormatted: "₹ 18,00,000",
-    sqydPrice: "1 Acre",
-    area: "1 Acre",
-    facing: "Agricultural",
-    posted: "Posted 1 week ago",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 8,
-    title: "Commercial Plot in Ahmedabad",
-    location: "Ahmedabad, Gujarat",
-    city: "Ahmedabad",
-    type: "Commercial Land",
-    price: 9000000,
-    priceFormatted: "₹ 90,00,000",
-    sqydPrice: "1500 Sq.Ft",
-    area: "1500 Sq.Ft",
-    facing: "Commercial",
-    posted: "Posted 1 week ago",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-  {
-    id: 9,
-    title: "Residential Plot in Gandhinagar",
-    location: "Gandhinagar, Gujarat",
-    city: "Gandhinagar",
-    type: "Residential Plot",
-    price: 4000000,
-    priceFormatted: "₹ 40,00,000",
-    sqydPrice: "1500 Sq.Ft",
-    area: "1500 Sq.Ft",
-    facing: "Residential",
-    posted: "Posted 1 week ago",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
-    badge: "For Sale",
-    badgeColor: "bg-emerald-500 text-white",
-  },
-];
+import { getApprovedProperties } from "../api/api"; // Aapke api.js ka correct path
 
 const PROPERTY_TYPES = ["Residential Plot", "Agricultural Land", "Commercial Land", "Industrial Land"];
 const LOCATIONS = ["Ahmedabad", "Viramgam", "Surat", "Rajkot", "Vadodara", "Mehsana", "Gandhinagar"];
@@ -177,6 +32,10 @@ export default function Properties() {
 
   const queryLocation = searchParams.get("location") || "";
   const queryType = searchParams.get("type") || "";
+
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [selectedLocation, setSelectedLocation] = useState(
     LOCATIONS.includes(queryLocation) ? queryLocation : ""
@@ -189,6 +48,24 @@ export default function Properties() {
   const [sortBy, setSortBy] = useState("Newest First");
   const [favorites, setFavorites] = useState([]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Fetch approved properties from API on component mount
+  useEffect(() => {
+    const fetchApprovedProperties = async () => {
+      try {
+        setLoading(true);
+        const data = await getApprovedProperties();
+        const propertyList = Array.isArray(data) ? data : data?.properties || data?.data || [];
+        setProperties(propertyList);
+      } catch (err) {
+        setError(err.message || "Failed to load approved properties.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApprovedProperties();
+  }, []);
 
   const handleTypeChange = (type) => {
     setSelectedTypes((prev) =>
@@ -211,19 +88,23 @@ export default function Properties() {
   };
 
   const filteredProperties = useMemo(() => {
-    return INITIAL_PROPERTIES.filter((item) => {
-      if (selectedLocation && item.city.toLowerCase() !== selectedLocation.toLowerCase()) {
+    return properties.filter((item) => {
+      const itemCity = item.city || item.location || "";
+      const itemType = item.type || item.propertyType || "";
+      const itemPrice = item.price || 0;
+
+      if (selectedLocation && !itemCity.toLowerCase().includes(selectedLocation.toLowerCase())) {
         return false;
       }
-      if (!selectedTypes.includes(item.type)) {
+      if (selectedTypes.length > 0 && !selectedTypes.includes(itemType)) {
         return false;
       }
-      if (item.price > maxPrice) {
+      if (itemPrice > maxPrice) {
         return false;
       }
       return true;
     });
-  }, [selectedLocation, selectedTypes, maxPrice]);
+  }, [properties, selectedLocation, selectedTypes, maxPrice]);
 
   const FilterFields = () => (
     <div className="space-y-6 text-xs">
@@ -378,7 +259,7 @@ export default function Properties() {
         {/* Top Count & View Toggle Bar */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs sm:text-sm font-semibold text-gray-600">
-            Showing <span className="text-gray-900 font-bold">1-{filteredProperties.length}</span> of <span className="text-gray-900 font-bold">48</span> Properties
+            Showing <span className="text-gray-900 font-bold">{filteredProperties.length > 0 ? 1 : 0}-{filteredProperties.length}</span> of <span className="text-gray-900 font-bold">{properties.length}</span> Properties
           </p>
 
           <div className="flex items-center gap-3">
@@ -422,7 +303,7 @@ export default function Properties() {
             </div>
             <FilterFields />
 
-            {/* SIDEBAR PROMO CARD: Have a Property to Sell? */}
+            {/* SIDEBAR PROMO CARD */}
             <div className="relative overflow-hidden rounded-2xl bg-[#090b0c] p-5 text-white shadow-md border border-amber-500/30">
               <div className="absolute -right-4 -bottom-4 opacity-15">
                 <MapPin className="h-32 w-32 text-amber-400" />
@@ -466,7 +347,16 @@ export default function Properties() {
 
           {/* PROPERTY RESULTS GRID */}
           <main className="lg:col-span-3">
-            {filteredProperties.length === 0 ? (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-16 text-center shadow-sm border border-gray-100">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-500 mb-3" />
+                <p className="text-sm font-semibold text-gray-600">Loading approved properties...</p>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 text-center shadow-sm border border-red-100 text-red-500">
+                <p className="text-sm font-bold">{error}</p>
+              </div>
+            ) : filteredProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center shadow-sm">
                 <MapPin className="h-10 w-10 text-gray-300 mb-2" />
                 <h3 className="text-base font-bold text-gray-800">No properties found</h3>
@@ -478,30 +368,35 @@ export default function Properties() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProperties.map((item) => {
-                  const isFav = favorites.includes(item.id);
+                  const propId = item._id || item.id;
+                  const isFav = favorites.includes(propId);
+                  const imageUrl = item.image || item.images?.[0] || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=800&auto=format&fit=crop";
+                  const formattedPrice = item.priceFormatted || `₹ ${item.price?.toLocaleString()}`;
 
                   return (
                     <div
-                      key={item.id}
+                      key={propId}
                       className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                     >
                       {/* Image Thumbnail */}
                       <div className="relative h-44 w-full overflow-hidden bg-gray-100">
                         <img
-                          src={item.image}
+                          src={imageUrl}
                           alt={item.title}
                           loading="lazy"
                           className="h-full w-full cursor-pointer object-cover transition-transform duration-500 group-hover:scale-105"
+                          onClick={() => navigate(`/propertiesDetails?id=${propId}`)}
                         />
 
                         {/* Status Badge */}
-                        <span className={`absolute top-3 left-3 rounded-md px-2.5 py-1 text-[10px] font-bold shadow-sm ${item.badgeColor}`}>
-                          {item.badge}
+                        <span className={`absolute top-3 left-3 rounded-md px-2.5 py-1 text-[10px] font-bold shadow-sm ${item.badgeColor || "bg-emerald-500 text-white"}`}>
+                          {item.badge || item.status || "Approved"}
                         </span>
+                        
                         {/* Favorite Heart */}
                         <button
                           type="button"
-                          onClick={(e) => toggleFavorite(item.id, e)}
+                          onClick={(e) => toggleFavorite(propId, e)}
                           className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-gray-700 backdrop-blur-md shadow hover:text-rose-500 transition"
                         >
                           <Heart className={`h-4 w-4 ${isFav ? "fill-red-500 text-red-500" : "text-gray-700"}`} />
@@ -512,7 +407,7 @@ export default function Properties() {
                       <div className="flex flex-1 flex-col justify-between p-4">
                         <div>
                           <h3
-                            onClick={() => navigate(`/propertiesDetails?id=${item.id}`)}
+                            onClick={() => navigate(`/propertiesDetails?id=${propId}`)}
                             className="font-serif text-sm font-bold text-gray-900 line-clamp-1 cursor-pointer hover:text-amber-600 transition"
                           >
                             {item.title}
@@ -520,15 +415,15 @@ export default function Properties() {
 
                           <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
                             <MapPin className="h-3 w-3 text-amber-500 shrink-0" />
-                            <span className="truncate">{item.location}</span>
+                            <span className="truncate">{item.location || item.city}</span>
                           </div>
 
                           <div className="mt-3 flex items-baseline justify-between">
                             <span className="font-serif text-base font-extrabold text-gray-900">
-                              {item.priceFormatted}
+                              {formattedPrice}
                             </span>
                             <span className="text-[11px] font-bold text-gray-400">
-                              {item.sqydPrice}
+                              {item.sqydPrice || item.area || ""}
                             </span>
                           </div>
                         </div>
@@ -537,19 +432,19 @@ export default function Properties() {
                         <div className="mt-3.5 pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-500 font-medium">
                           <div className="flex items-center gap-1">
                             <Maximize2 className="h-3 w-3 text-gray-400" />
-                            <span>{item.area}</span>
+                            <span>{item.area || "1200 sq. ft"}</span>
                           </div>
                           <span>•</span>
-                          <span>{item.facing}</span>
+                          <span>{item.facing || item.roadAccess || "Main Road"}</span>
                           <span>•</span>
-                          <span className="text-gray-400">{item.posted}</span>
+                          <span className="text-gray-400">{item.posted || "Approved"}</span>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="mt-3.5 grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            onClick={() => navigate(`/propertiesDetails?id=${item.id}`)}
+                            onClick={() => navigate(`/propertiesDetails?id=${propId}`)}
                             className="flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition"
                           >
                             <Eye className="h-3.5 w-3.5 text-amber-500" />
@@ -558,7 +453,7 @@ export default function Properties() {
 
                           <button
                             type="button"
-                            onClick={() => alert(`Contacting owner for property #${item.id}`)}
+                            onClick={() => alert(`Contacting owner for property #${propId}`)}
                             className="flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 py-2 text-xs font-bold text-white shadow transition hover:scale-105"
                           >
                             <Phone className="h-3.5 w-3.5" />
@@ -574,26 +469,22 @@ export default function Properties() {
             )}
 
             {/* PAGINATION FOOTER */}
-            <div className="mt-10 flex items-center justify-center gap-1.5">
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
-                &lt;
-              </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-xs font-bold text-white shadow">
-                1
-              </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
-                2
-              </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
-                3
-              </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
-                4
-              </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
-                &gt;
-              </button>
-            </div>
+            {!loading && filteredProperties.length > 0 && (
+              <div className="mt-10 flex items-center justify-center gap-1.5">
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                  &lt;
+                </button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-xs font-bold text-white shadow">
+                  1
+                </button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
+                  2
+                </button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
+                  &gt;
+                </button>
+              </div>
+            )}
           </main>
 
         </div>

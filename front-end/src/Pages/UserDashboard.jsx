@@ -1,39 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import DashboardContent from "../components/DashboardContent";
+import DashboardHeader from "../components/DashboardHeader";
 
-export default function UserDashboard() {
-    const [activeTab, setActiveTab] = useState("Dashboard");
-
-    useEffect(() => {
-        const handleDashboardTab = (event) => {
-            setActiveTab(event.detail);
-        };
-
-        window.addEventListener("dashboardTabChange", handleDashboardTab);
-
-        return () => {
-            window.removeEventListener(
-                "dashboardTabChange",
-                handleDashboardTab
-            );
-        };
-    }, []);
+export default function DashboardLayout() {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-[#090b0c] md:flex-row">
-            {/* Sidebar: mobile par upar, desktop par left side */}
-            <aside className="w-full shrink-0 sm:pt-[88px] md:w-64 md:pt-0 lg:w-72">
-                <Sidebar
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                />
-            </aside>
+        <div className="min-h-screen w-full bg-[#f8fafc]">
 
-            {/* Content: mobile par neeche, desktop par right side */}
-            <div className="min-w-0 flex-1">
-                <DashboardContent activeTab={activeTab} />
-            </div>
+            {/* Sidebar */}
+            <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
+
+            {/* Main Content */}
+            <main className="w-full min-w-0 md:ml-72 md:w-[calc(100%-18rem)]">
+
+                <DashboardHeader
+                    onMenuClick={() => setSidebarOpen(true)}
+                />
+
+                <Outlet />
+
+            </main>
         </div>
     );
 }

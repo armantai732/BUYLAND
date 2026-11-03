@@ -1,8 +1,8 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   Upload,
   MapPin,
-  DollarSign,
   FileText,
   Road,
   Zap,
@@ -11,12 +11,9 @@ import {
   ShieldCheck,
   User,
   FileCheck,
-  Trash2,
-  FileBadge,
   CheckCircle,
   Image as ImageIcon,
   X,
-  Building2,
   Ruler,
   MapPinned,
   ArrowRight,
@@ -31,8 +28,6 @@ const initialFormData = {
   sellerName: "",
   sellerPhone: "",
   sellerWhatsapp: "",
-  aadhaarNo: "",
-  panNo: "",
   price: "",
   isNegotiable: "",
   area: "",
@@ -119,9 +114,11 @@ function Section({ icon: Icon, number, title, description, children }) {
               STEP {number}
             </span>
           </div>
+
           <h2 className="text-lg font-bold text-[#102c50] sm:text-xl">
             {title}
           </h2>
+
           {description && (
             <p className="mt-1 text-xs text-slate-500 sm:text-sm">
               {description}
@@ -158,11 +155,14 @@ function UploadBox({
         onChange={onChange}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       />
+
       <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#bd9140] shadow-sm">
         <Icon size={21} />
       </div>
+
       <p className="text-sm font-bold text-[#102c50]">{title}</p>
       <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+
       <span className="mt-3 rounded-lg bg-[#102c50] px-4 py-2 text-xs font-semibold text-white">
         Browse Files
       </span>
@@ -173,16 +173,10 @@ function UploadBox({
 export default function SellProperty() {
   const [formData, setFormData] = useState({ ...initialFormData });
   const [selectedAmenities, setSelectedAmenities] = useState([]);
-
   const [images, setImages] = useState([]);
-  const [aadhaarFile, setAadhaarFile] = useState(null);
-  const [panFile, setPanFile] = useState(null);
-  const [propertyDocs, setPropertyDocs] = useState([]);
-
   const [submitting, setSubmitting] = useState(false);
 
   const fileInputRef = useRef(null);
-  const propDocInputRef = useRef(null);
   const imageUrlsRef = useRef([]);
 
   useEffect(() => {
@@ -194,7 +188,11 @@ export default function SellProperty() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleAmenityToggle = (name) => {
@@ -205,8 +203,10 @@ export default function SellProperty() {
     );
   };
 
+  // PROPERTY IMAGE UPLOAD
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files || []);
+
     if (!files.length) return;
 
     const newImages = files.map((file) => ({
@@ -214,70 +214,52 @@ export default function SellProperty() {
       preview: URL.createObjectURL(file),
     }));
 
-    imageUrlsRef.current.push(...newImages.map((img) => img.preview));
+    imageUrlsRef.current.push(
+      ...newImages.map((img) => img.preview)
+    );
+
     setImages((prev) => [...prev, ...newImages]);
+
     e.target.value = "";
   };
 
+  // REMOVE PROPERTY IMAGE
   const removeImage = (index) => {
     setImages((prev) => {
       const image = prev[index];
+
       if (image) {
         URL.revokeObjectURL(image.preview);
+
         imageUrlsRef.current = imageUrlsRef.current.filter(
           (url) => url !== image.preview
         );
       }
+
       return prev.filter((_, i) => i !== index);
     });
   };
 
-  const handlePropertyDocsUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    const newDocs = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    imageUrlsRef.current.push(...newDocs.map((doc) => doc.preview));
-    setPropertyDocs((prev) => [...prev, ...newDocs]);
-    e.target.value = "";
-  };
-
-  const removePropertyDoc = (index) => {
-    setPropertyDocs((prev) => {
-      const doc = prev[index];
-      if (doc) {
-        URL.revokeObjectURL(doc.preview);
-        imageUrlsRef.current = imageUrlsRef.current.filter(
-          (url) => url !== doc.preview
-        );
-      }
-      return prev.filter((_, i) => i !== index);
-    });
-  };
-
+  // RESET FORM
   const resetForm = () => {
     setFormData({ ...initialFormData });
     setSelectedAmenities([]);
-    setAadhaarFile(null);
-    setPanFile(null);
 
     images.forEach((img) => URL.revokeObjectURL(img.preview));
-    propertyDocs.forEach((doc) => URL.revokeObjectURL(doc.preview));
 
     imageUrlsRef.current = [];
-    setImages([]);
-    setPropertyDocs([]);
 
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (propDocInputRef.current) propDocInputRef.current.value = "";
+    setImages([]);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
+  // SUBMIT PROPERTY
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (submitting) return;
 
     const token = localStorage.getItem("token");
@@ -292,11 +274,6 @@ export default function SellProperty() {
       return;
     }
 
-    if (!aadhaarFile || !panFile) {
-      alert("Please upload both Aadhaar and PAN verification documents.");
-      return;
-    }
-
     try {
       setSubmitting(true);
 
@@ -306,14 +283,12 @@ export default function SellProperty() {
         propertyData.append(key, value ?? "");
       });
 
-      propertyData.append("amenities", JSON.stringify(selectedAmenities));
-      propertyData.append("aadhaarPhoto", aadhaarFile);
-      propertyData.append("panPhoto", panFile);
+      propertyData.append(
+        "amenities",
+        JSON.stringify(selectedAmenities)
+      );
 
-      propertyDocs.forEach((doc) => {
-        propertyData.append("propertyLegalDocs", doc.file);
-      });
-
+      // Only property images
       images.forEach((image) => {
         propertyData.append("images", image.file);
       });
@@ -326,9 +301,12 @@ export default function SellProperty() {
       );
 
       resetForm();
+
     } catch (error) {
       console.error("Property submission error:", error);
+
       alert(error.message || "Property submission failed.");
+
     } finally {
       setSubmitting(false);
     }
@@ -339,8 +317,9 @@ export default function SellProperty() {
 
       <div className="mx-auto max-w-6xl">
 
-        {/* EXACT HERO BANNER MATCHING SCREENSHOT */}
+        {/* HERO BANNER */}
         <div className="relative mb-8 overflow-hidden rounded-3xl bg-[#090b0c] text-white shadow-xl border border-amber-200/40">
+
           <div className="absolute inset-0 opacity-45">
             <img
               src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop"
@@ -348,21 +327,24 @@ export default function SellProperty() {
               className="h-full w-full object-cover"
             />
           </div>
+
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
 
           <div className="relative z-10 px-6 py-10 sm:px-10 sm:py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+
             <div className="space-y-3 max-w-xl">
+
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#e2bd72]">
                 <span>LIST YOUR PROPERTY</span>
                 <span className="h-[2px] w-8 bg-[#e2bd72]" />
               </div>
 
               <h1 className="font-serif text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-                Sell Land &amp; <span className="text-[#e2bd72]">Plots</span>[cite: 14]
+                Sell Land &amp; <span className="text-[#e2bd72]">Plots</span>
               </h1>
 
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-medium">
-                Provide complete plot details, legal documents and reach genuine buyers across Gujarat[cite: 14].
+                Provide complete plot details and reach genuine buyers across Gujarat.
               </p>
 
               <div className="pt-2">
@@ -370,10 +352,11 @@ export default function SellProperty() {
                   href="#sell-form"
                   className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:scale-105"
                 >
-                  <span>Start Selling Today</span>[cite: 14]
+                  <span>Start Selling Today</span>
                   <ArrowRight size={15} />
                 </a>
               </div>
+
             </div>
 
             <div className="hidden lg:flex items-center justify-center p-4">
@@ -381,19 +364,25 @@ export default function SellProperty() {
                 <MapPin size={40} />
               </div>
             </div>
+
           </div>
         </div>
 
         {/* FORM */}
-        <form id="sell-form" onSubmit={handleSubmit} className="space-y-6">
+        <form
+          id="sell-form"
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
 
-          {/* SECTION 1 */}
+          {/* SECTION 1: SELLER CONTACT */}
           <Section
             number="01"
             icon={User}
-            title="Seller Contact & Verification (KYC)"
-            description="Provide your contact information and identity verification details."
+            title="Seller Contact Details"
+            description="Provide your contact information."
           >
+
             <Field label="I am" required>
               <SelectField
                 name="sellerType"
@@ -409,280 +398,426 @@ export default function SellProperty() {
             </Field>
 
             <Field label="Your Full Name" required>
-              <input className={inputClass} name="sellerName" value={formData.sellerName} onChange={handleChange} placeholder="Enter your full name" required />
+              <input
+                className={inputClass}
+                name="sellerName"
+                value={formData.sellerName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                required
+              />
             </Field>
 
             <Field label="Mobile Number" required>
-              <input className={inputClass} type="tel" name="sellerPhone" value={formData.sellerPhone} onChange={handleChange} placeholder="+91 9876543210" required />
+              <input
+                className={inputClass}
+                type="tel"
+                name="sellerPhone"
+                value={formData.sellerPhone}
+                onChange={handleChange}
+                placeholder="+91 9876543210"
+                required
+              />
             </Field>
 
             <Field label="WhatsApp Number" required>
-              <input className={inputClass} type="tel" name="sellerWhatsapp" value={formData.sellerWhatsapp} onChange={handleChange} placeholder="+91 9876543210" required />
+              <input
+                className={inputClass}
+                type="tel"
+                name="sellerWhatsapp"
+                value={formData.sellerWhatsapp}
+                onChange={handleChange}
+                placeholder="+91 9876543210"
+                required
+              />
             </Field>
 
-            <Field label="Aadhaar Number" required>
-              <input className={inputClass} name="aadhaarNo" value={formData.aadhaarNo} onChange={handleChange} placeholder="Enter Aadhaar Number" required />
-            </Field>
-
-            <Field label="PAN Card Number" required>
-              <input className={inputClass} name="panNo" value={formData.panNo} onChange={handleChange} placeholder="Enter PAN Number" required />
-            </Field>
-
-            <Field label="Aadhaar Card Photo" required>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <input type="file" accept="image/*" required onChange={(e) => setAadhaarFile(e.target.files[0] || null)} className="w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#102c50] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white" />
-                {aadhaarFile && <p className="mt-2 truncate text-xs text-emerald-600">✓ {aadhaarFile.name}</p>}
-              </div>
-            </Field>
-
-            <Field label="PAN Card Photo" required>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <input type="file" accept="image/*" required onChange={(e) => setPanFile(e.target.files[0] || null)} className="w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#102c50] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white" />
-                {panFile && <p className="mt-2 truncate text-xs text-emerald-600">✓ {panFile.name}</p>}
-              </div>
-            </Field>
           </Section>
 
-          {/* SECTION 2 */}
+          {/* SECTION 2: BASIC PROPERTY DETAILS */}
           <Section
             number="02"
             icon={FileText}
             title="Basic Property Details"
             description="Enter the main information about the property you want to list."
           >
-            <Field label="Property Title / Headline" required className="sm:col-span-2">
-              <input className={inputClass} name="title" value={formData.title} onChange={handleChange} placeholder="e.g. Prime NA Residential Plot near SP Ring Road" required />
+
+            <Field
+              label="Property Title / Headline"
+              required
+              className="sm:col-span-2"
+            >
+              <input
+                className={inputClass}
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g. Prime NA Residential Plot near SP Ring Road"
+                required
+              />
             </Field>
 
             <Field label="Property Category" required>
-              <SelectField name="propertyType" value={formData.propertyType} onChange={handleChange} placeholder="Select Property Type" options={[
-                { value: "Residential Plot", label: "Residential Plot" },
-                { value: "Agricultural Land", label: "Agricultural Land" },
-                { value: "Commercial Land", label: "Commercial Land" },
-                { value: "Industrial Land", label: "Industrial Land" },
-                { value: "Recreational Land", label: "Recreational Land" },
-              ]} />
+              <SelectField
+                name="propertyType"
+                value={formData.propertyType}
+                onChange={handleChange}
+                placeholder="Select Property Type"
+                options={[
+                  { value: "Residential Plot", label: "Residential Plot" },
+                  { value: "Agricultural Land", label: "Agricultural Land" },
+                  { value: "Commercial Land", label: "Commercial Land" },
+                  { value: "Industrial Land", label: "Industrial Land" },
+                  { value: "Recreational Land", label: "Recreational Land" },
+                ]}
+              />
             </Field>
 
             <Field label="Ownership Type" required>
-              <SelectField name="ownershipType" value={formData.ownershipType} onChange={handleChange} placeholder="Select Ownership Type" options={[
-                { value: "Single Owner", label: "Single Owner" },
-                { value: "Joint Ownership", label: "Joint Ownership" },
-                { value: "Power of Attorney", label: "Power of Attorney" },
-              ]} />
+              <SelectField
+                name="ownershipType"
+                value={formData.ownershipType}
+                onChange={handleChange}
+                placeholder="Select Ownership Type"
+                options={[
+                  { value: "Single Owner", label: "Single Owner" },
+                  { value: "Joint Ownership", label: "Joint Ownership" },
+                  { value: "Power of Attorney", label: "Power of Attorney" },
+                ]}
+              />
             </Field>
+
           </Section>
 
-          {/* SECTION 3 */}
+          {/* SECTION 3: LEGAL STATUS */}
           <Section
             number="03"
             icon={FileCheck}
             title="Legal & Approval Status"
             description="Provide accurate legal and zoning information about the land."
           >
+
             <Field label="N.A. Status" required>
-              <SelectField name="naStatus" value={formData.naStatus} onChange={handleChange} placeholder="Select N.A. Status" options={[
-                { value: "NA Approved", label: "NA Approved" },
-                { value: "Agricultural Land (Old Tenure)", label: "Agricultural Land (Old Tenure / જૂની શરત)" },
-                { value: "Agricultural Land (New Tenure)", label: "Agricultural Land (New Tenure / નવી શરત)" },
-                { value: "TP Scheme Approved", label: "TP Scheme Approved" },
-              ]} />
+              <SelectField
+                name="naStatus"
+                value={formData.naStatus}
+                onChange={handleChange}
+                placeholder="Select N.A. Status"
+                options={[
+                  { value: "NA Approved", label: "NA Approved" },
+                  { value: "Agricultural Land (Old Tenure)", label: "Agricultural Land (Old Tenure / જૂની શરત)" },
+                  { value: "Agricultural Land (New Tenure)", label: "Agricultural Land (New Tenure / નવી શરત)" },
+                  { value: "TP Scheme Approved", label: "TP Scheme Approved" },
+                ]}
+              />
             </Field>
 
             <Field label="Title Clear?" required>
-              <SelectField name="titleClear" value={formData.titleClear} onChange={handleChange} placeholder="Select Title Status" options={[
-                { value: "Yes", label: "Yes (Title Clear & Marketable)" },
-                { value: "In Progress", label: "In Progress" },
-              ]} />
+              <SelectField
+                name="titleClear"
+                value={formData.titleClear}
+                onChange={handleChange}
+                placeholder="Select Title Status"
+                options={[
+                  { value: "Yes", label: "Yes (Title Clear & Marketable)" },
+                  { value: "In Progress", label: "In Progress" },
+                ]}
+              />
             </Field>
 
             <Field label="Zone Type" required>
-              <SelectField name="zoneType" value={formData.zoneType} onChange={handleChange} placeholder="Select Zone Type" options={[
-                { value: "Residential Zone", label: "Residential Zone" },
-                { value: "Commercial Zone", label: "Commercial Zone" },
-                { value: "Industrial Zone", label: "Industrial Zone" },
-                { value: "Green/Agricultural Zone", label: "Green/Agricultural Zone" },
-              ]} />
+              <SelectField
+                name="zoneType"
+                value={formData.zoneType}
+                onChange={handleChange}
+                placeholder="Select Zone Type"
+                options={[
+                  { value: "Residential Zone", label: "Residential Zone" },
+                  { value: "Commercial Zone", label: "Commercial Zone" },
+                  { value: "Industrial Zone", label: "Industrial Zone" },
+                  { value: "Green/Agricultural Zone", label: "Green/Agricultural Zone" },
+                ]}
+              />
             </Field>
+
           </Section>
 
-          {/* SECTION 4 */}
+          {/* SECTION 4: PRICE & DIMENSIONS */}
           <Section
             number="04"
             icon={Ruler}
             title="Price & Plot Dimensions"
             description="Specify your expected price, land size and plot measurements."
           >
+
             <Field label="Expected Price (₹)" required>
-              <input className={inputClass} name="price" value={formData.price} onChange={handleChange} placeholder="e.g. 45,00,000" required />
+              <input
+                className={inputClass}
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="e.g. 45,00,000"
+                required
+              />
             </Field>
 
             <Field label="Price Negotiable?" required>
-              <SelectField name="isNegotiable" value={formData.isNegotiable} onChange={handleChange} placeholder="Select Price Type" options={[
-                { value: "Yes", label: "Yes (Negotiable)" },
-                { value: "Fixed Price", label: "Fixed Price" },
-              ]} />
+              <SelectField
+                name="isNegotiable"
+                value={formData.isNegotiable}
+                onChange={handleChange}
+                placeholder="Select Price Type"
+                options={[
+                  { value: "Yes", label: "Yes (Negotiable)" },
+                  { value: "Fixed Price", label: "Fixed Price" },
+                ]}
+              />
             </Field>
 
             <Field label="Total Size / Area" required>
-              <div className="flex gap-2">
-                <input className={`${inputClass} min-w-0`} type="number" min="0.01" step="any" name="area" value={formData.area} onChange={handleChange} placeholder="1200" required />
-                <select className={`${inputClass} w-28 shrink-0 px-2`} name="areaUnit" value={formData.areaUnit} onChange={handleChange} required>
-                  <option value="" disabled>Unit</option>
-                  {["sq. yd", "sq. ft", "Acre", "Bigha", "Guntha"].map((v) => <option key={v} value={v}>{v}</option>)}
-                </select>
+              <div className="flex gap-3">
+                <input
+                  className={`${inputClass} min-w-0 flex-1`}
+                  type="number"
+                  step="any"
+                  name="area"
+                  value={formData.area}
+                  onChange={handleChange}
+                  placeholder="Enter area (e.g. 1200)"
+                  required
+                />
+
+                <input
+                  className={`${inputClass} w-36 sm:w-44 shrink-0`}
+                  type="text"
+                  name="areaUnit"
+                  value={formData.areaUnit}
+                  onChange={handleChange}
+                  placeholder="Enter Unit"
+                  list="area-units"
+                  required
+                />
+
+                <datalist id="area-units">
+                  <option value="sq. yd" />
+                  <option value="sq. ft" />
+                  <option value="Acre" />
+                  <option value="Bigha" />
+                  <option value="Guntha" />
+                  <option value="Hectare" />
+                </datalist>
               </div>
             </Field>
 
             <Field label="Facing Direction" required>
-              <SelectField name="facing" value={formData.facing} onChange={handleChange} placeholder="Select Facing" options={[
-                { value: "East Facing", label: "East Facing" },
-                { value: "West Facing", label: "West Facing" },
-                { value: "North Facing", label: "North Facing" },
-                { value: "South Facing", label: "South Facing" },
-                { value: "Corner Plot", label: "Corner Plot" },
-              ]} />
+              <SelectField
+                name="facing"
+                value={formData.facing}
+                onChange={handleChange}
+                placeholder="Select Facing"
+                options={[
+                  { value: "East Facing", label: "East Facing" },
+                  { value: "West Facing", label: "West Facing" },
+                  { value: "North Facing", label: "North Facing" },
+                  { value: "South Facing", label: "South Facing" },
+                  { value: "Corner Plot", label: "Corner Plot" },
+                ]}
+              />
             </Field>
 
             <Field label="Frontage / Road Front (ft)">
-              <input className={inputClass} type="number" min="0" name="frontageFeet" value={formData.frontageFeet} onChange={handleChange} placeholder="e.g. 40 ft" />
+              <input
+                className={inputClass}
+                type="number"
+                min="0"
+                name="frontageFeet"
+                value={formData.frontageFeet}
+                onChange={handleChange}
+                placeholder="e.g. 40 ft"
+              />
             </Field>
 
             <Field label="Plot Depth (ft)">
-              <input className={inputClass} type="number" min="0" name="depthFeet" value={formData.depthFeet} onChange={handleChange} placeholder="e.g. 60 ft" />
+              <input
+                className={inputClass}
+                type="number"
+                min="0"
+                name="depthFeet"
+                value={formData.depthFeet}
+                onChange={handleChange}
+                placeholder="e.g. 60 ft"
+              />
             </Field>
 
             <Field label="Road Width" required>
-              <SelectField name="roadWidth" value={formData.roadWidth} onChange={handleChange} placeholder="Select Road Width" options={[
-                { value: "Main Road (60ft+)", label: "Main Road (60ft+)" },
-                { value: "Internal Road (30ft/40ft)", label: "Internal Road (30ft/40ft)" },
-                { value: "Touch Highway", label: "Touch Highway" },
-                { value: "Service Road", label: "Service Road" },
-              ]} />
+              <SelectField
+                name="roadWidth"
+                value={formData.roadWidth}
+                onChange={handleChange}
+                placeholder="Select Road Width"
+                options={[
+                  { value: "Main Road (60ft+)", label: "Main Road (60ft+)" },
+                  { value: "Internal Road (30ft/40ft)", label: "Internal Road (30ft/40ft)" },
+                  { value: "Touch Highway", label: "Touch Highway" },
+                  { value: "Service Road", label: "Service Road" },
+                ]}
+              />
             </Field>
 
             <Field label="Corner Plot?" required>
-              <SelectField name="cornerPlot" value={formData.cornerPlot} onChange={handleChange} placeholder="Select Corner Plot" options={[
-                { value: "Yes", label: "Yes (2 Side Roads)" },
-                { value: "No", label: "No (1 Side Road)" },
-              ]} />
+              <SelectField
+                name="cornerPlot"
+                value={formData.cornerPlot}
+                onChange={handleChange}
+                placeholder="Select Corner Plot"
+                options={[
+                  { value: "Yes", label: "Yes (2 Side Roads)" },
+                  { value: "No", label: "No (1 Side Road)" },
+                ]}
+              />
             </Field>
+
           </Section>
 
-          {/* SECTION 5 */}
+          {/* SECTION 5: LOCATION */}
           <Section
             number="05"
             icon={MapPinned}
             title="Location & Scheme Details"
             description="Add the property's complete address and map location."
           >
-            <Field label="Complete Address or Landmark" required className="sm:col-span-2 lg:col-span-3">
-              <input className={inputClass} name="address" value={formData.address} onChange={handleChange} placeholder="Plot No. 45, Science City Road, Near SP Ring Road" required />
+
+            <Field
+              label="Complete Address or Landmark"
+              required
+              className="sm:col-span-2 lg:col-span-3"
+            >
+              <input
+                className={inputClass}
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Plot No. 45, Science City Road, Near SP Ring Road"
+                required
+              />
             </Field>
 
             <Field label="TP No. / Revenue Survey No.">
-              <input className={inputClass} name="tpNumber" value={formData.tpNumber} onChange={handleChange} placeholder="e.g. TP 44, Survey 120" />
+              <input
+                className={inputClass}
+                name="tpNumber"
+                value={formData.tpNumber}
+                onChange={handleChange}
+                placeholder="e.g. TP 44, Survey 120"
+              />
             </Field>
 
             <Field label="City" required>
-              <input className={inputClass} name="city" value={formData.city} onChange={handleChange} placeholder="e.g. Ahmedabad" required />
+              <input
+                className={inputClass}
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="e.g. Ahmedabad"
+                required
+              />
             </Field>
 
             <Field label="State" required>
-              <input className={inputClass} name="state" value={formData.state} onChange={handleChange} placeholder="e.g. Gujarat" required />
+              <input
+                className={inputClass}
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                placeholder="e.g. Gujarat"
+                required
+              />
             </Field>
 
             <Field label="Pincode">
-              <input className={inputClass} name="pincode" value={formData.pincode} onChange={handleChange} placeholder="Enter pincode" />
+              <input
+                className={inputClass}
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleChange}
+                placeholder="Enter pincode"
+              />
             </Field>
 
-            <Field label="Google Maps Location Link (Optional)" className="sm:col-span-2">
-              <input className={inputClass} type="url" name="googleMapsLink" value={formData.googleMapsLink} onChange={handleChange} placeholder="https://maps.google.com/?q=..." />
+            <Field
+              label="Google Maps Location Link (Optional)"
+              className="sm:col-span-2"
+            >
+              <input
+                className={inputClass}
+                type="url"
+                name="googleMapsLink"
+                value={formData.googleMapsLink}
+                onChange={handleChange}
+                placeholder="https://maps.google.com/?q=..."
+              />
             </Field>
+
           </Section>
 
-          {/* SECTION 6 */}
+          {/* SECTION 6: AMENITIES & PHOTOS */}
           <Section
             number="06"
             icon={Upload}
-            title="Amenities, Property Documents & Photos"
-            description="Select available facilities and upload property documents and images."
+            title="Amenities & Property Photos"
+            description="Select available facilities and upload property images."
           >
+
             <div className="sm:col-span-2 lg:col-span-3">
-              <label className={labelClass}>Available Features</label>
+
+              <label className={labelClass}>
+                Available Features
+              </label>
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
                 {amenities.map(({ name, icon: Icon }) => {
                   const checked = selectedAmenities.includes(name);
+
                   return (
                     <button
                       type="button"
                       key={name}
                       onClick={() => handleAmenityToggle(name)}
                       aria-pressed={checked}
-                      className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
-                        checked
+                      className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${checked
                           ? "border-[#bd9140] bg-[#fbf7ed] text-[#102c50]"
                           : "border-slate-200 bg-white text-slate-600 hover:border-[#bd9140]"
-                      }`}
+                        }`}
                     >
                       <Icon size={20} className="shrink-0 text-[#bd9140]" />
-                      <span className="text-xs font-semibold">{name}</span>
-                      {checked && <CheckCircle size={16} className="ml-auto text-emerald-600" />}
+
+                      <span className="text-xs font-semibold">
+                        {name}
+                      </span>
+
+                      {checked && (
+                        <CheckCircle
+                          size={16}
+                          className="ml-auto text-emerald-600"
+                        />
+                      )}
                     </button>
                   );
                 })}
+
               </div>
-            </div>
-
-            {/* LEGAL DOCUMENTS */}
-            <div className="border-t border-slate-100 pt-6 sm:col-span-2 lg:col-span-3">
-              <div className="mb-3 flex items-center gap-2">
-                <FileBadge size={19} className="text-[#bd9140]" />
-                <label className="text-sm font-bold text-[#102c50]">
-                  Upload Property Legal Documents
-                </label>
-              </div>
-
-              <p className="mb-4 text-xs leading-5 text-slate-500">
-                7/12 Utara, Sale Deed, Title Deed, NA Order etc. Multiple files allowed.
-              </p>
-
-              <UploadBox
-                title="Upload Property Legal Files"
-                subtitle="PDF or Images • Multiple files allowed"
-                accept="image/*,.pdf"
-                multiple
-                inputRef={propDocInputRef}
-                onChange={handlePropertyDocsUpload}
-                icon={FileBadge}
-              />
-
-              {propertyDocs.length > 0 && (
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {propertyDocs.map((doc, idx) => (
-                    <div key={doc.preview} className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#bd9140]">
-                        <FileText size={20} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-700">Document #{idx + 1}</p>
-                        <p className="truncate text-[10px] text-slate-500">{doc.file.name}</p>
-                      </div>
-                      <button type="button" onClick={() => removePropertyDoc(idx)} className="rounded-lg p-2 text-red-500 hover:bg-red-50" aria-label="Remove document">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* PROPERTY PHOTOS */}
             <div className="border-t border-slate-100 pt-6 sm:col-span-2 lg:col-span-3">
+
               <div className="mb-3 flex items-center gap-2">
                 <ImageIcon size={19} className="text-[#bd9140]" />
+
                 <label className="text-sm font-bold text-[#102c50]">
-                  Upload Main Land / Plot Photos <span className="text-red-500">*</span>
+                  Upload Main Land / Plot Photos{" "}
+                  <span className="text-red-500">*</span>
                 </label>
               </div>
 
@@ -702,9 +837,18 @@ export default function SellProperty() {
 
               {images.length > 0 && (
                 <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+
                   {images.map((img, idx) => (
-                    <div key={img.preview} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                      <img src={img.preview} alt={`Property ${idx + 1}`} className="h-full w-full object-cover" />
+                    <div
+                      key={img.preview}
+                      className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+                    >
+                      <img
+                        src={img.preview}
+                        alt={`Property ${idx + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+
                       <button
                         type="button"
                         onClick={() => removeImage(idx)}
@@ -713,24 +857,32 @@ export default function SellProperty() {
                       >
                         <X size={16} />
                       </button>
+
                       <span className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-1 text-[10px] text-white">
                         Photo {idx + 1}
                       </span>
                     </div>
                   ))}
+
                 </div>
               )}
+
             </div>
+
           </Section>
 
-          {/* SECTION 7 */}
+          {/* SECTION 7: DESCRIPTION */}
           <Section
             number="07"
             icon={FileText}
             title="Detailed Description"
             description="Tell buyers more about your property and its advantages."
           >
-            <Field label="Property Description" className="sm:col-span-2 lg:col-span-3">
+
+            <Field
+              label="Property Description"
+              className="sm:col-span-2 lg:col-span-3"
+            >
               <textarea
                 name="description"
                 rows={6}
@@ -740,20 +892,29 @@ export default function SellProperty() {
                 className={`${inputClass} resize-y`}
               />
             </Field>
+
           </Section>
 
           {/* SUBMIT AREA */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+
             <div className="mb-5 flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 shrink-0 text-[#bd9140]" size={22} />
+
+              <ShieldCheck
+                className="mt-0.5 shrink-0 text-[#bd9140]"
+                size={22}
+              />
+
               <div>
                 <h3 className="text-sm font-bold text-[#102c50]">
                   Ready to list your property?
                 </h3>
+
                 <p className="mt-1 text-xs leading-5 text-slate-500">
                   Please review all the details before submitting. Your property will be sent for admin verification.
                 </p>
               </div>
+
             </div>
 
             <button
@@ -761,6 +922,7 @@ export default function SellProperty() {
               disabled={submitting}
               className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#102c50] px-6 py-4 text-sm font-bold text-white shadow-md transition hover:bg-[#183e6b] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
+
               {submitting ? (
                 <>
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -772,13 +934,17 @@ export default function SellProperty() {
                   Post Property For Sale
                 </>
               )}
+
             </button>
 
             <p className="mt-3 text-center text-[11px] text-slate-400">
               By submitting, you confirm that the information provided is accurate.
             </p>
+
           </div>
+
         </form>
+
       </div>
     </div>
   );

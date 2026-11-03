@@ -1,11 +1,11 @@
 
+import mongoose from "mongoose";
 import Property from "../model/propertyModel.js";
 
-// Get logged-in user ID
 const getUserId = (req) =>
   req.user?._id || req.user?.id || req.user?.userId;
 
-// Parse Indian price format: 45,00,000
+// Parse Indian price format
 const parsePrice = (value) => {
   if (typeof value === "string") {
     return Number(value.replace(/,/g, "").trim());
@@ -41,11 +41,6 @@ export const createProperty = async (req, res) => {
       sellerPhone,
       sellerWhatsapp,
 
-      // KYC
-      aadhaarNo,
-      panNo,
-
-      // Pricing
       price,
       isNegotiable,
       area,
@@ -56,12 +51,10 @@ export const createProperty = async (req, res) => {
       cornerPlot,
       roadWidth,
 
-      // Legal
       naStatus,
       titleClear,
       zoneType,
 
-      // Location
       address,
       tpNumber,
       city,
@@ -69,12 +62,10 @@ export const createProperty = async (req, res) => {
       pincode,
       googleMapsLink,
 
-      // Other
       description,
       amenities,
     } = req.body;
 
-    // Validate price and area
     const parsedPrice = parsePrice(price);
     const parsedArea = Number(area);
 
@@ -90,31 +81,11 @@ export const createProperty = async (req, res) => {
       });
     }
 
-    // Validate KYC numbers
-    const cleanAadhaar = String(aadhaarNo || "").replace(/\s/g, "");
-    const cleanPan = String(panNo || "").trim().toUpperCase();
-
-    if (!/^\d{12}$/.test(cleanAadhaar)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid 12-digit Aadhaar number.",
-      });
-    }
-
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(cleanPan)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid PAN number.",
-      });
-    }
-
     // Parse amenities
     let parsedAmenities = [];
 
     try {
-      parsedAmenities = amenities
-        ? JSON.parse(amenities)
-        : [];
+      parsedAmenities = amenities ? JSON.parse(amenities) : [];
 
       if (!Array.isArray(parsedAmenities)) {
         throw new Error("Amenities must be an array.");
@@ -126,15 +97,10 @@ export const createProperty = async (req, res) => {
       });
     }
 
-    // Uploaded files
+    // Uploaded property images
     const files = req.files || {};
-
     const uploadedImages = getFileUrls(files.images);
-    const uploadedAadhaar = getFileUrls(files.aadhaarPhoto);
-    const uploadedPan = getFileUrls(files.panPhoto);
-    const uploadedLegalDocs = getFileUrls(files.propertyLegalDocs);
 
-    // Required file validation
     if (uploadedImages.length === 0) {
       return res.status(400).json({
         success: false,
@@ -149,29 +115,9 @@ export const createProperty = async (req, res) => {
       });
     }
 
-    if (uploadedAadhaar.length !== 1 || uploadedPan.length !== 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Aadhaar and PAN card photos are required.",
-      });
-    }
-
-    if (
-      uploadedAadhaar.length !== (files.aadhaarPhoto || []).length ||
-      uploadedPan.length !== (files.panPhoto || []).length ||
-      uploadedLegalDocs.length !== (files.propertyLegalDocs || []).length
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Some verification or legal documents failed to upload.",
-      });
-    }
-
-    // Create property
     const property = await Property.create({
       seller: userId,
 
-      // Basic Details
       title,
       propertyType,
       ownershipType,
@@ -180,13 +126,6 @@ export const createProperty = async (req, res) => {
       sellerPhone,
       sellerWhatsapp,
 
-      // KYC
-      aadhaarNo: cleanAadhaar,
-      panNo: cleanPan,
-      aadhaarPhoto: uploadedAadhaar[0],
-      panPhoto: uploadedPan[0],
-
-      // Pricing & Dimensions
       price: parsedPrice,
       isNegotiable,
       area: parsedArea,
@@ -197,12 +136,10 @@ export const createProperty = async (req, res) => {
       cornerPlot,
       roadWidth,
 
-      // Legal
       naStatus,
       titleClear,
       zoneType,
 
-      // Location
       address,
       tpNumber,
       city,
@@ -210,15 +147,10 @@ export const createProperty = async (req, res) => {
       pincode,
       googleMapsLink,
 
-      // Description
       description,
-
-      // Amenities and Documents
       amenities: parsedAmenities,
       images: uploadedImages,
-      propertyLegalDocs: uploadedLegalDocs,
 
-      // Approval
       status: "Processing",
     });
 
@@ -227,6 +159,7 @@ export const createProperty = async (req, res) => {
       message: "Property submitted successfully. Waiting for admin approval.",
       property,
     });
+
   } catch (error) {
     console.error("Create Property Error:", error);
 
@@ -243,15 +176,14 @@ export const getProcessingProperties = async (req, res) => {
   try {
     const properties = await Property.find({
       status: "Processing",
-    })
-      .select("+aadhaarNo +panNo +aadhaarPhoto +panPhoto +propertyLegalDocs")
-      .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       count: properties.length,
       properties,
     });
+
   } catch (error) {
     console.error("Get Processing Properties Error:", error);
 
@@ -308,6 +240,7 @@ export const approveProperty = async (req, res) => {
       message: "Property approved successfully.",
       property,
     });
+
   } catch (error) {
     console.error("Approve Property Error:", error);
 
@@ -326,7 +259,7 @@ export const rejectProperty = async (req, res) => {
     const { id } = req.params;
 
     const property = await Property.findOneAndUpdate(
-      { _id: req.params.id, status: "Processing" },
+      { _id: id, status: "Processing" },
       {
         $set: {
           status: "Rejected",
@@ -350,6 +283,7 @@ export const rejectProperty = async (req, res) => {
       message: "Property rejected successfully.",
       property,
     });
+
   } catch (error) {
     console.error("Reject Property Error:", error);
 
@@ -365,7 +299,7 @@ export const rejectProperty = async (req, res) => {
 export const getApprovedProperties = async (req, res) => {
   try {
     const properties = await Property.find({
-      status: "Approved",
+      status: { $ne: "Processing" },
     }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -373,6 +307,7 @@ export const getApprovedProperties = async (req, res) => {
       count: properties.length,
       properties,
     });
+
   } catch (error) {
     console.error("Get Approved Properties Error:", error);
 
@@ -405,6 +340,7 @@ export const getMyProperties = async (req, res) => {
       count: properties.length,
       properties,
     });
+
   } catch (error) {
     console.error("Get My Properties Error:", error);
 
@@ -415,14 +351,11 @@ export const getMyProperties = async (req, res) => {
   }
 };
 
-
-
-// ADMIN: GET ALL PROPERTIES
+// 7. ADMIN: GET ALL PROPERTIES
 // GET /api/property/admin/all
 export const getAllProperties = async (req, res) => {
   try {
     const properties = await Property.find({})
-      .select("+aadhaarNo +panNo +aadhaarPhoto +panPhoto +propertyLegalDocs")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -430,6 +363,7 @@ export const getAllProperties = async (req, res) => {
       count: properties.length,
       properties,
     });
+
   } catch (error) {
     console.error("Get All Properties Error:", error);
 
@@ -440,12 +374,8 @@ export const getAllProperties = async (req, res) => {
   }
 };
 
-
-
-
-// ADMIN: UPDATE APPROVED PROPERTY PRICE AND MARK AS SOLD OUT
+// 8. ADMIN: UPDATE PRICE AND MARK SOLD OUT
 // PATCH /api/property/admin/:id/sold-out
-
 export const updateApprovedProperty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -483,12 +413,102 @@ export const updateApprovedProperty = async (req, res) => {
       message: "Price updated and property marked as Sold Out.",
       property,
     });
+
   } catch (error) {
     console.error("Update Approved Property Error:", error);
 
     return res.status(500).json({
       success: false,
       message: "Failed to update property.",
+    });
+  }
+};
+
+
+export const getMyPropertyProfile = async (req, res) => {
+  try {
+    const properties = await Property.find({
+      seller: req.user.id,
+    })
+      .select("sellerType city state sellerWhatsapp")
+      .sort({ createdAt: -1 });
+
+    if (!properties.length) {
+      return res.status(200).json({
+        success: true,
+        message: "No properties found",
+        data: {
+          sellerType: "",
+          city: "",
+          state: "",
+          whatsappNumber: "",
+        },
+      });
+    }
+
+    // Latest property ki details
+    const latestProperty = properties[0];
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        sellerType: latestProperty.sellerType,
+        city: latestProperty.city,
+        state: latestProperty.state,
+        whatsappNumber: latestProperty.sellerWhatsapp,
+      },
+    });
+
+  } catch (error) {
+    console.error("Get My Property Profile Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch property profile",
+    });
+  }
+};
+
+
+
+export const getPropertyById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid property ID",
+      });
+    }
+
+    const property = await Property.findOne({
+      _id: id,
+      status: { $ne: "Processing" },
+    })
+      .select("-aadhaarNo -panNo -aadhaarPhoto -panPhoto -propertyLegalDocs")
+      .populate("seller", "name email mobileNumber");
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found or not approved",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Property details fetched successfully",
+      property,
+    });
+
+  } catch (error) {
+    console.error("Get Property By ID Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch property details",
     });
   }
 };

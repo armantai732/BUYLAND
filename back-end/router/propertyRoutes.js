@@ -7,7 +7,9 @@ import {
   getAllProperties,
   getApprovedProperties,
   getMyProperties,
+  getMyPropertyProfile,
   getProcessingProperties,
+  getPropertyById,
   rejectProperty,
   updateApprovedProperty,
 } from "../controler/propertyController.js";
@@ -25,12 +27,6 @@ propertyRoutes.get("/approved", getApprovedProperties);
 propertyRoutes.post(
   "/",
   verifyToken,
-  upload.fields([
-    { name: "images", maxCount: 20 },
-    { name: "aadhaarPhoto", maxCount: 1 },
-    { name: "panPhoto", maxCount: 1 },
-    { name: "propertyLegalDocs", maxCount: 10 },
-  ]),
   createProperty
 );
 
@@ -74,5 +70,10 @@ propertyRoutes.patch(
   isAdmin,
   updateApprovedProperty
 );
+
+
+propertyRoutes.get("/my-property-profile", verifyToken, getMyPropertyProfile);
+propertyRoutes.get("/:id", getPropertyById);
+
 
 export default propertyRoutes;

@@ -55,32 +55,6 @@ const propertySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
-    // KYC Details
-    aadhaarNo: {
-      type: String,
-      required: true,
-      trim: true,
-      select: false,
-    },
-    panNo: {
-      type: String,
-      required: true,
-      uppercase: true,
-      trim: true,
-      select: false,
-    },
-    aadhaarPhoto: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    panPhoto: {
-      type: String,
-      required: true,
-      select: false,
-    },
-
     // Pricing & Area
     price: {
       type: Number,
@@ -196,14 +170,6 @@ const propertySchema = new mongoose.Schema(
         message: "At least one property image is required.",
       },
     },
-
-    // Multiple Property Legal Documents
-    propertyLegalDocs: {
-      type: [String],
-      default: [],
-      select: false,
-    },
-
     // Approval Workflow
     status: {
       type: String,

@@ -13,13 +13,16 @@ import Footer from "./components/Footer";
 import PropertyDetail from "./Pages/PropertyDetail";
 import { useEffect } from "react";
 import SellProperty from "./Pages/SellProperty";
-import UserDashboard from "./Pages/UserDashboard";
 import AdminLayout from "./admin/AdminLayout";
 import AdminOverview from "./admin/pages/AdminOverview";
 import AdminPropertyListings from "./admin/pages/AdminPropertyListings";
 import AdminUserManagement from "./admin/pages/AdminUserManagement";
 import AdminSettings from "./admin/pages/AdminSettings";
 import Profile from "./Pages/Profile";
+import UserDashboard from "./Pages/UserDashboard";
+import Dashboard from "./components/DashboardContent";
+import MyProperties from "./Pages/MyProperties";
+import Wishlist from "./Pages/Wishlist";
 
 export default function App() {
   const location = useLocation();
@@ -53,8 +56,13 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/sale" element={<SellProperty />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/profile" element={<Profile />} />
+          {/* USER DASHBOARD */}
+          <Route path="/dashboard" element={<UserDashboard />}>
+            <Route index element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="my-properties" element={<MyProperties />} />
+            <Route path="wishlist" element={<Wishlist />} />
+          </Route>
 
           <Route path="/admindashboard" element={<AdminLayout />}>
             <Route index element={<AdminOverview />} />

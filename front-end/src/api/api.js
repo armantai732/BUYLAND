@@ -1,10 +1,10 @@
 
-const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
-).replace(/\/+$/, "");
-
-
-// const BASE_URL = ("http://localhost:8080"
+// const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080"
 // ).replace(/\/+$/, "");
+
+
+const BASE_URL = ("http://localhost:8080"
+).replace(/\/+$/, "");
 
 const API_URL = BASE_URL.endsWith("/api")
     ? BASE_URL
@@ -202,9 +202,6 @@ export const createProperty = async (propertyData) => {
 };
 
 
-
-
-
 export const getAllProperties = async () => {
     const token = localStorage.getItem("token");
 
@@ -311,4 +308,40 @@ export const updateUserAPI = async (id, userData) => {
     }
 
     return data;
+};
+
+
+export const getMyPropertyProfile = async () => {
+    const res = await fetch(`${API_URL}/property/my-property-profile`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch property profile");
+    }
+
+    return data;
+};
+
+
+
+// GET PROPERTY DETAILS BY ID
+export const getPropertyById = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/property/${id}`);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch property details");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Get Property By ID API Error:", error);
+    throw error;
+  }
 };
