@@ -11,7 +11,7 @@ import {
 export default function DashboardHeader({ onMenuClick }) {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-sm">
-      
+
       {/* Left Side */}
       <div className="flex items-center gap-3 w-full max-w-xl">
         <button
@@ -23,7 +23,7 @@ export default function DashboardHeader({ onMenuClick }) {
         </button>
 
         {/* Search Bar */}
-        <div className="relative w-full max-w-md">
+        {/* <div className="relative w-full max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 
           <input
@@ -31,22 +31,12 @@ export default function DashboardHeader({ onMenuClick }) {
             placeholder="Search properties..."
             className="w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 py-2 text-xs sm:text-sm text-gray-800 outline-none focus:border-amber-400 focus:bg-white"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right Side */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-            2
-          </span>
-        </button>
 
-        <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600">
-          <MessageSquare className="h-5 w-5" />
-          <span className="absolute top-1 right-1.5 h-2 w-2 rounded-full bg-red-500" />
-        </button>
 
         {/* Avatar */}
         <div className="flex items-center gap-2 pl-2 border-l border-gray-200 cursor-pointer">
@@ -54,7 +44,6 @@ export default function DashboardHeader({ onMenuClick }) {
             A
           </div>
 
-          <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
         </div>
       </div>
     </header>

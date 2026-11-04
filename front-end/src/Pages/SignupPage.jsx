@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { User, Mail, Phone, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { User, Mail, Phone, Lock, Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerData } from "../api/api";
 import { signInWithPopup } from "firebase/auth";
@@ -8,6 +8,7 @@ import { loginWithGoogleToken } from "../api/googleAuth";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // <--- Loading state added
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     role: "",
@@ -29,6 +30,8 @@ export default function SignupPage() {
     e.preventDefault();
 
     try {
+      setLoading(true); // <--- Start loading
+
       const payload = {
         role: formData.role || "user",
         name: formData.name.trim(),
@@ -50,7 +53,7 @@ export default function SignupPage() {
 
         setFormData({
           role: "",
-          fullName: "",
+          name: "",
           email: "",
           mobileNumber: "",
           password: "",
@@ -67,19 +70,17 @@ export default function SignupPage() {
 
       alert(
         error?.response?.data?.message ||
-        error?.message ||
-        "Registration failed. Please try again."
+          error?.message ||
+          "Registration failed. Please try again."
       );
+    } finally {
+      setLoading(false); // <--- Stop loading
     }
   };
 
-
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(
-        firebaseAuth,
-        googleProvider
-      );
+      const result = await signInWithPopup(firebaseAuth, googleProvider);
 
       const idToken = await result.user.getIdToken();
 
@@ -105,8 +106,6 @@ export default function SignupPage() {
 
       {/* ================= LEFT BANNER SECTION ================= */}
       <div className="relative w-full md:w-5/12 lg:w-5/12 bg-[#090b0c] p-6 sm:p-8 lg:p-10 text-white flex flex-col justify-between overflow-hidden min-h-[160px] md:h-full shrink-0">
-
-        {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop"
@@ -116,7 +115,6 @@ export default function SignupPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/95 md:bg-gradient-to-r md:from-black/90 md:via-black/70 md:to-black/30" />
         </div>
 
-        {/* Top Logo Bar */}
         <div className="relative z-10 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#e5ba73] to-[#ffe59a] text-[#30230c] shadow-md font-bold text-lg">
             🏠
@@ -126,7 +124,6 @@ export default function SignupPage() {
           </span>
         </div>
 
-        {/* Welcome Text */}
         <div className="relative z-10 my-auto py-2 md:py-0">
           <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-tight">
             Join BuyLand
@@ -136,7 +133,6 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Footer info (Desktop) */}
         <div className="relative z-10 text-[11px] text-gray-400 font-medium hidden md:block">
           © {new Date().getFullYear()} BuyLand Inc. All rights reserved.
         </div>
@@ -144,11 +140,10 @@ export default function SignupPage() {
         <div className="hidden md:block absolute -bottom-16 -left-16 w-48 h-48 border-t-2 border-[#ffd77f]/35 rounded-full pointer-events-none" />
       </div>
 
-      {/* ================= RIGHT FORM SECTION (Vertical Stack) ================= */}
+      {/* ================= RIGHT FORM SECTION ================= */}
       <div className="relative z-20 w-full md:w-7/12 lg:w-7/12 bg-white -mt-6 md:mt-0 rounded-t-3xl md:rounded-none px-6 py-5 sm:px-12 md:px-16 lg:px-24 flex flex-col justify-center text-gray-800 shadow-[0_-15px_30px_rgba(0,0,0,0.4)] md:shadow-none h-full overflow-y-auto">
         <div className="w-full max-w-sm mx-auto my-auto">
 
-          {/* Header */}
           <div className="text-center md:text-left mb-3">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
               Create Account
@@ -158,7 +153,6 @@ export default function SignupPage() {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-2.5">
 
             {/* Account Type Field */}
@@ -189,7 +183,7 @@ export default function SignupPage() {
               </select>
             </div>
 
-            {/* Admin Secret Key Field (Appears below when Admin is selected) */}
+            {/* Admin Secret Key Field */}
             {formData.role === "admin" && (
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-red-600 mb-0.5">
@@ -234,10 +228,10 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* mobileNumber Number Field */}
+            {/* Mobile Number Field */}
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-700 mb-0.5">
-                mobileNumber Number
+                Mobile Number
               </label>
               <div className="relative flex items-center">
                 <div className="absolute left-3.5 text-gray-400">
@@ -247,7 +241,7 @@ export default function SignupPage() {
                   type="tel"
                   name="mobileNumber"
                   required
-                  placeholder="Enter mobileNumber number"
+                  placeholder="Enter mobile number"
                   value={formData.mobileNumber ?? ""}
                   onChange={handleChange}
                   className="w-full rounded-xl border border-gray-200 bg-gray-50/70 pl-10 pr-3.5 py-2 text-xs sm:text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-[#d8b46a] focus:bg-white focus:ring-1 focus:ring-[#d8b46a]"
@@ -308,12 +302,14 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button with Loader & Disabled State */}
             <button
               type="submit"
-              className="mt-3 w-full rounded-xl bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] py-2.5 text-xs sm:text-sm font-bold text-[#30230c] shadow-sm transition-all hover:brightness-105 active:scale-[0.98]"
+              disabled={loading}
+              className="mt-3 w-full rounded-xl bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] py-2.5 text-xs sm:text-sm font-bold text-[#30230c] shadow-sm transition-all hover:brightness-105 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Register
+              {loading && <Loader2 className="h-4 w-4 animate-spin text-[#30230c]" />}
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
 
@@ -327,7 +323,6 @@ export default function SignupPage() {
 
           {/* Social Logins */}
           <div className="space-y-2">
-            {/* Google */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -340,17 +335,6 @@ export default function SignupPage() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
               </svg>
               <span>Continue with Google</span>
-            </button>
-
-            {/* Facebook */}
-            <button
-              type="button"
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-[0.99]"
-            >
-              <svg className="h-4 w-4 fill-[#1877F2]" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              <span>Continue with Facebook</span>
             </button>
           </div>
 

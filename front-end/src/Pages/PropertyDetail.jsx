@@ -64,7 +64,6 @@ export default function PropertyDetails() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // URL se MongoDB ID
   const propertyId = searchParams.get("id");
 
   const [property, setProperty] = useState(null);
@@ -81,6 +80,9 @@ export default function PropertyDetails() {
     mobile: "",
     message: "I'm interested in this property...",
   });
+  // Fixed BuyLand Contact Number
+  const contactNumber = "8401918533";
+  const whatsappNumber = "918401918533";
 
   // Database se property fetch
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function PropertyDetails() {
         const response = await getPropertyById(propertyId);
 
         const propertyData =
-          response?.property || response?.data || response;
+          response?.property || response?.data?.property || response?.data || response;
 
         if (!propertyData || !propertyData._id) {
           throw new Error("Property not found in database");
@@ -118,7 +120,7 @@ export default function PropertyDetails() {
     fetchProperty();
   }, [propertyId]);
 
-  // Google Maps link se actual location ke coordinates fetch karna
+  // Google Maps link se coordinates fetch karna
   useEffect(() => {
     if (!property?.googleMapsLink) {
       setMapCoordinates(null);
@@ -208,20 +210,20 @@ export default function PropertyDetails() {
 
   const images = Array.isArray(rawImages)
     ? rawImages
-        .map((img) =>
-          typeof img === "string"
-            ? img
-            : img?.url || img?.secure_url
-        )
-        .filter(Boolean)
+      .map((img) =>
+        typeof img === "string"
+          ? img
+          : img?.url || img?.secure_url
+      )
+      .filter(Boolean)
     : [];
 
   const galleryImages =
     images.length > 0
       ? images
       : [
-          "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
-        ];
+        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
+      ];
 
   // Property Location
   const location = [
@@ -234,9 +236,8 @@ export default function PropertyDetails() {
     .join(", ");
 
   // Property Area
-  const area = `${property.area || property.plotSize || "N/A"} ${
-    property.areaUnit || property.unit || ""
-  }`.trim();
+  const area = `${property.area || property.plotSize || "N/A"} ${property.areaUnit || property.unit || ""
+    }`.trim();
 
   // Price Formatting
   const formatPrice = (price) =>
@@ -245,7 +246,7 @@ export default function PropertyDetails() {
   const pricePerUnit =
     Number(property.area || property.plotSize) > 0
       ? Number(property.price) /
-        Number(property.area || property.plotSize)
+      Number(property.area || property.plotSize)
       : null;
 
   // Seller Details
@@ -255,15 +256,7 @@ export default function PropertyDetails() {
     property.ownerName ||
     "Property Owner";
 
-  const sellerPhone =
-    property.seller?.mobileNumber ||
-    property.sellerPhone ||
-    property.phone ||
-    "";
-
   const sellerType = property.sellerType || "Seller";
-
-  const whatsappNumber = sellerPhone.replace(/\D/g, "").slice(-10);
 
   // Amenities
   const rawAmenities = property.amenities || property.features || [];
@@ -294,6 +287,67 @@ export default function PropertyDetails() {
     );
   };
 
+  // WhatsApp Property Details Message
+  const handleWhatsApp = () => {
+    if (!whatsappNumber) {
+      alert("Seller WhatsApp number is not available");
+      return;
+    }
+
+    const propertyLink = window.location.href;
+
+    const message = `
+Hello ${sellerName},
+
+I am interested in your property listed on BuyLand.
+
+🏡 PROPERTY DETAILS
+━━━━━━━━━━━━━━━━━━
+
+📌 Property Name: ${property.title || "N/A"}
+🏢 Property Type: ${property.propertyType || "N/A"}
+📍 Location: ${location || "N/A"}
+📐 Area: ${area || "N/A"}
+💰 Price: ₹${formatPrice(property.price)}
+💵 Price Per Unit: ${pricePerUnit
+        ? `₹${formatPrice(Math.round(pricePerUnit))} / ${property.areaUnit || "Unit"}`
+        : "N/A"
+      }
+📏 Facing: ${property.facing || "N/A"}
+🛣️ Road Width: ${property.roadWidth || "N/A"} Ft
+👤 Ownership: ${property.ownershipType || "N/A"}
+🏷️ Seller Type: ${sellerType}
+📋 NA Status: ${property.naStatus || "N/A"}
+✅ Legal Status: ${property.titleClear || "N/A"}
+📍 TP Number: ${property.tpNumber || "N/A"}
+
+📝 DESCRIPTION:
+${propertyDescription}
+
+⭐ AMENITIES:
+${propertyAmenities.length > 0
+        ? propertyAmenities.join(", ")
+        : "Not specified"
+      }
+
+🔗 PROPERTY LINK:
+${propertyLink}
+
+━━━━━━━━━━━━━━━━━━
+
+I would like to know more details about this property.
+
+Thank you!
+BuyLand Customer
+`;
+
+    const whatsappURL = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    window.open(whatsappURL, "_blank", "noopener,noreferrer");
+  };
+
   // Contact Message
   const handleSubmitMessage = (e) => {
     e.preventDefault();
@@ -310,7 +364,6 @@ export default function PropertyDetails() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-1 hover:text-amber-600 transition"
@@ -333,7 +386,6 @@ export default function PropertyDetails() {
             <span className="text-gray-900 font-semibold truncate">
               {property.title || "Property Details"}
             </span>
-
           </div>
         </div>
       </div>
@@ -342,7 +394,6 @@ export default function PropertyDetails() {
 
         {/* HEADER TITLE & PRICE */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
               {property.title}
@@ -354,7 +405,6 @@ export default function PropertyDetails() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-700">
-
               <span className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
                 <Maximize2 className="h-3.5 w-3.5 text-gray-500" />
                 {area}
@@ -374,26 +424,22 @@ export default function PropertyDetails() {
                 <CheckCircle2 className="h-3.5 w-3.5 text-gray-500" />
                 {property.naStatus || "N/A Status"}
               </span>
-
             </div>
           </div>
 
           <div className="text-left md:text-right shrink-0">
-
             <div className="font-serif text-2xl sm:text-3xl font-extrabold text-gray-900">
               ₹ {formatPrice(property.price)}
             </div>
 
             <div className="text-xs font-semibold text-gray-400 mt-0.5">
               {pricePerUnit
-                ? `₹ ${formatPrice(Math.round(pricePerUnit))} / ${
-                    property.areaUnit || "Unit"
-                  }`
+                ? `₹ ${formatPrice(Math.round(pricePerUnit))} / ${property.areaUnit || "Unit"
+                }`
                 : "Price details"}
             </div>
 
             <div className="mt-2.5 flex items-center md:justify-end gap-2">
-
               {property.status === "Approved" && (
                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
                   <ShieldCheck className="h-3.5 w-3.5" />
@@ -406,7 +452,6 @@ export default function PropertyDetails() {
                   Sold Out
                 </span>
               )}
-
             </div>
           </div>
         </div>
@@ -417,9 +462,7 @@ export default function PropertyDetails() {
           {/* IMAGE GALLERY */}
           <div className="lg:col-span-8 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-
               <div className="relative md:col-span-8 h-[300px] sm:h-[380px] rounded-2xl overflow-hidden bg-gray-900 group shadow-md">
-
                 <img
                   src={galleryImages[activeImageIndex]}
                   alt={property.title}
@@ -456,7 +499,6 @@ export default function PropertyDetails() {
                 <span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md">
                   📷 {activeImageIndex + 1} / {galleryImages.length}
                 </span>
-
               </div>
 
               <div className="hidden md:grid md:col-span-4 grid-cols-1 gap-2.5 h-[380px]">
@@ -464,11 +506,10 @@ export default function PropertyDetails() {
                   <div
                     key={idx}
                     onClick={() => setActiveImageIndex(idx + 1)}
-                    className={`relative rounded-xl overflow-hidden cursor-pointer h-[115px] border-2 transition ${
-                      activeImageIndex === idx + 1
-                        ? "border-amber-500 shadow-md"
-                        : "border-transparent opacity-85 hover:opacity-100"
-                    }`}
+                    className={`relative rounded-xl overflow-hidden cursor-pointer h-[115px] border-2 transition ${activeImageIndex === idx + 1
+                      ? "border-amber-500 shadow-md"
+                      : "border-transparent opacity-85 hover:opacity-100"
+                      }`}
                   >
                     <img
                       src={img}
@@ -478,15 +519,12 @@ export default function PropertyDetails() {
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
 
           {/* CONTACT OWNER */}
           <div className="lg:col-span-4 rounded-2xl bg-white p-5 shadow-sm border border-gray-100 space-y-5">
-
             <div className="flex items-start gap-3 border-b border-gray-100 pb-4">
-
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-700 font-bold text-lg">
                 👤
               </div>
@@ -507,38 +545,35 @@ export default function PropertyDetails() {
                   </span>
                 </div>
               </div>
-
             </div>
 
             <div className="space-y-2">
-
               <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-700 bg-gray-50 px-3 py-2 rounded-xl">
-                <span>{sellerPhone || "Phone not available"}</span>
+                <span>{contactNumber || "Phone not available"}</span>
 
-                  <a
-                    href={`tel:8401918533`}
-                    className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-bold text-white hover:bg-black transition"
-                  >
-                    <Phone className="h-3.5 w-3.5 text-amber-400" />
-                    Call Now
-                  </a>
+                <a
+                  href={contactNumber ? `tel:${contactNumber}` : undefined}
+                  className={`flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-bold text-white hover:bg-black transition ${!contactNumber ? "pointer-events-none opacity-50" : ""
+                    }`}
+                >
+                  <Phone className="h-3.5 w-3.5 text-amber-400" />
+                  Call Now
+                </a>
               </div>
 
               <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-700 bg-gray-50 px-3 py-2 rounded-xl">
-                <span>{sellerPhone || "WhatsApp not available"}</span>
+                <span>{whatsappNumber || "WhatsApp not available"}</span>
 
-                  <a
-                    href={`https://wa.me/8401918533`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition"
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    WhatsApp
-                  </a>
-                
+                <button
+                  type="button"
+                  onClick={handleWhatsApp}
+                  disabled={!whatsappNumber}
+                  className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  WhatsApp
+                </button>
               </div>
-
             </div>
 
             {/* MESSAGE FORM */}
@@ -616,7 +651,6 @@ export default function PropertyDetails() {
                 <Send className="h-3.5 w-3.5" />
                 <span>Send Message</span>
               </button>
-
             </form>
           </div>
         </div>
@@ -626,17 +660,14 @@ export default function PropertyDetails() {
 
           {/* LEFT DETAILS */}
           <div className="lg:col-span-8 space-y-6">
-
             {/* PROPERTY DETAILS */}
             <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-
               <h3 className="font-serif text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                 <Home className="h-5 w-5 text-amber-500" />
                 Property Details
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-xs">
-
                 <DetailRow
                   label="Property Type"
                   value={property.propertyType}
@@ -672,11 +703,7 @@ export default function PropertyDetails() {
 
                 <DetailRow
                   label="Legal Status"
-                  value={
-                    property.titleClear
-                      ? "Clear Title"
-                      : "Not Specified"
-                  }
+                  value={property.titleClear}
                 />
 
                 <DetailRow
@@ -702,19 +729,16 @@ export default function PropertyDetails() {
                   label="Property Status"
                   value={property.status}
                 />
-
               </div>
             </div>
 
             {/* AMENITIES */}
             <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-
               <h3 className="font-serif text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                 ⭐ Amenities
               </h3>
 
               <div className="grid grid-cols-2 sm:grid-cols-2 gap-y-3 text-xs font-semibold text-gray-700">
-
                 {propertyAmenities.length > 0 ? (
                   propertyAmenities.map((amenity, index) => (
                     <div
@@ -730,13 +754,11 @@ export default function PropertyDetails() {
                     No amenities listed
                   </p>
                 )}
-
               </div>
             </div>
 
             {/* DESCRIPTION */}
             <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-
               <h3 className="font-serif text-lg font-bold text-gray-900 mb-3">
                 Property Description
               </h3>
@@ -744,22 +766,18 @@ export default function PropertyDetails() {
               <p className="text-sm text-gray-600 leading-7 whitespace-pre-line">
                 {propertyDescription}
               </p>
-
             </div>
           </div>
 
           {/* RIGHT MAP SECTION */}
           <div className="lg:col-span-4 space-y-6">
-
             <div className="rounded-2xl bg-white p-4 shadow-sm border border-gray-100 space-y-3">
-
               <h3 className="font-serif text-base font-bold text-gray-900 flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-amber-500" />
                 Property Location Map
               </h3>
 
               <div className="relative h-60 w-full rounded-xl overflow-hidden border border-gray-200 shadow-inner z-0">
-
                 {mapLoading ? (
                   <div className="h-full flex items-center justify-center text-sm text-gray-500">
                     Loading property map...
@@ -793,7 +811,6 @@ export default function PropertyDetails() {
                     Property map location not available
                   </div>
                 )}
-
               </div>
 
               {property.googleMapsLink && (
@@ -807,7 +824,6 @@ export default function PropertyDetails() {
                   <span>Open in Google Maps</span>
                 </a>
               )}
-
             </div>
           </div>
         </div>

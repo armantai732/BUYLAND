@@ -12,6 +12,7 @@ import {
   getPropertyById,
   rejectProperty,
   updateApprovedProperty,
+  updateMyProperty,
 } from "../controler/propertyController.js";
 
 import verifyToken from "../middelware/verifyToken.js";
@@ -74,6 +75,7 @@ propertyRoutes.patch(
 
 propertyRoutes.get("/my-property-profile", verifyToken, getMyPropertyProfile);
 propertyRoutes.get("/:id", getPropertyById);
+propertyRoutes.put("/my/:id", verifyToken, updateMyProperty);
 
 
 export default propertyRoutes;

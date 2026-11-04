@@ -512,3 +512,231 @@ export const getPropertyById = async (req, res) => {
     });
   }
 };
+
+
+
+
+// UPDATE MY PROPERTY
+export const updateMyProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate property ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid property ID",
+      });
+    }
+
+    // Logged-in user ID from verifyToken middleware
+    const userId = req.user?.id || req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Please login again.",
+      });
+    }
+
+    // Find property belonging to logged-in user
+    const property = await Property.findOne({
+      _id: id,
+      seller: userId,
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found or you are not authorized to edit it.",
+      });
+    }
+
+    // Only Processing properties can be edited
+    if (property.status !== "Processing") {
+      return res.status(403).json({
+        success: false,
+        message: `You cannot edit a ${property.status} property.`,
+      });
+    }
+
+    const {
+      title,
+      propertyType,
+      ownershipType,
+      sellerType,
+      sellerName,
+      sellerPhone,
+      sellerWhatsapp,
+
+      price,
+      isNegotiable,
+      area,
+      areaUnit,
+      frontageFeet,
+      depthFeet,
+      facing,
+      cornerPlot,
+      roadWidth,
+
+      naStatus,
+      titleClear,
+      zoneType,
+
+      address,
+      tpNumber,
+      city,
+      state,
+      pincode,
+      googleMapsLink,
+
+      description,
+      amenities,
+      images,
+    } = req.body;
+
+    // Only allow these fields to be updated
+    const allowedFields = [
+      "title",
+      "propertyType",
+      "ownershipType",
+      "sellerType",
+      "sellerName",
+      "sellerPhone",
+      "sellerWhatsapp",
+      "price",
+      "isNegotiable",
+      "area",
+      "areaUnit",
+      "frontageFeet",
+      "depthFeet",
+      "facing",
+      "cornerPlot",
+      "roadWidth",
+      "naStatus",
+      "titleClear",
+      "zoneType",
+      "address",
+      "tpNumber",
+      "city",
+      "state",
+      "pincode",
+      "googleMapsLink",
+      "description",
+    ];
+
+    // Update normal fields
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        property[field] = req.body[field];
+      }
+    });
+
+    // Convert numeric fields
+    const numericFields = [
+      "price",
+      "area",
+      "frontageFeet",
+      "depthFeet",
+    ];
+
+    for (const field of numericFields) {
+      if (req.body[field] !== undefined) {
+        const value = req.body[field];
+
+        if (value === "" || value === null) {
+          return res.status(400).json({
+            success: false,
+            message: `${field} cannot be empty`,
+          });
+        }
+
+        const numberValue = Number(value);
+
+        if (!Number.isFinite(numberValue)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid ${field}`,
+          });
+        }
+
+        property[field] = numberValue;
+      }
+    }
+
+    // Update amenities
+    if (amenities !== undefined) {
+      let parsedAmenities = amenities;
+
+      if (typeof parsedAmenities === "string") {
+        try {
+          parsedAmenities = JSON.parse(parsedAmenities);
+        } catch {
+          parsedAmenities = parsedAmenities
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+        }
+      }
+
+      if (!Array.isArray(parsedAmenities)) {
+        return res.status(400).json({
+          success: false,
+          message: "Amenities must be an array",
+        });
+      }
+
+      property.amenities = parsedAmenities;
+    }
+
+    // Update images only when new images are provided
+    if (images !== undefined) {
+      let parsedImages = images;
+
+      if (typeof parsedImages === "string") {
+        try {
+          parsedImages = JSON.parse(parsedImages);
+        } catch {
+          parsedImages = [parsedImages];
+        }
+      }
+
+      if (!Array.isArray(parsedImages)) {
+        return res.status(400).json({
+          success: false,
+          message: "Images must be an array",
+        });
+      }
+
+      property.images = parsedImages;
+    }
+
+    // Save and validate schema
+    await property.save();
+
+    const updatedProperty = await Property.findById(property._id)
+      .populate("seller", "name email mobileNumber role");
+
+    return res.status(200).json({
+      success: true,
+      message: "Property updated successfully",
+      property: updatedProperty,
+    });
+
+  } catch (error) {
+    console.error("Update Property Error:", error);
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update property",
+      error: error.message,
+    });
+  }
+};

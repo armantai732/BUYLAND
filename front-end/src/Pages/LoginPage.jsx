@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginData } from "../api/api";
 import { loginWithGoogleToken } from "../api/googleAuth";
@@ -8,6 +8,7 @@ import { firebaseAuth, googleProvider } from "../firebase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // <--- Loading state added
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,18 +27,18 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
     try {
+      setLoading(true); // <--- Start loading
+
       const payload = {
         email: formData.email.trim().toLowerCase(),
-        password: formData.password
+        password: formData.password,
       };
 
       const response = await loginData(payload);
 
       // Supports both Axios response and direct API data
       const data = response?.data ?? response;
-
 
       if (data?.success) {
         // Save authentication details
@@ -66,25 +67,22 @@ export default function LoginPage() {
       } else {
         alert(data?.message || "Login failed");
       }
-
     } catch (error) {
       console.error("Login Error:", error);
 
       alert(
         error?.response?.data?.message ||
-        error?.message ||
-        "Login failed. Please try again."
+          error?.message ||
+          "Login failed. Please try again."
       );
+    } finally {
+      setLoading(false); // <--- Stop loading in both success and error cases
     }
   };
 
-
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(
-        firebaseAuth,
-        googleProvider
-      );
+      const result = await signInWithPopup(firebaseAuth, googleProvider);
 
       const idToken = await result.user.getIdToken();
 
@@ -108,21 +106,17 @@ export default function LoginPage() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0d0f12] flex flex-col md:flex-row font-sans m-0 p-0">
 
-      {/* ================= BANNER SECTION (Desktop Left / Mobile Header) ================= */}
+      {/* ================= BANNER SECTION ================= */}
       <div className="relative w-full md:w-5/12 lg:w-1/2 bg-[#090b0c] p-6 sm:p-8 lg:p-14 text-white flex flex-col justify-between overflow-hidden min-h-[240px] sm:min-h-[280px] md:h-full">
-
-        {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop"
             alt="Scenic Golden Sunset Land"
             className="h-full w-full object-cover object-[65%_center] brightness-[0.55]"
           />
-          {/* Dark Gradients */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/95 md:bg-gradient-to-r md:from-black/90 md:via-black/70 md:to-black/30" />
         </div>
 
-        {/* Top Logo Bar */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#e5ba73] to-[#ffe59a] text-[#30230c] shadow-lg font-bold text-xl sm:text-2xl">
             🏠
@@ -132,7 +126,6 @@ export default function LoginPage() {
           </span>
         </div>
 
-        {/* Welcome Text */}
         <div className="relative z-10 my-auto py-4 md:py-0">
           <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-tight">
             Welcome <br className="hidden lg:inline" /> Back!
@@ -142,20 +135,15 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Footer info (Desktop) */}
         <div className="relative z-10 text-xs text-gray-400 font-medium hidden md:block">
           © {new Date().getFullYear()} BuyLand Inc. All rights reserved.
         </div>
-
-        {/* Golden Curved Accent Line (Desktop Only) */}
-        <div className="hidden md:block absolute -bottom-16 -left-16 w-56 h-56 border-t-2 border-[#ffd77f]/35 rounded-full pointer-events-none" />
       </div>
 
-      {/* ================= FORM SECTION (Desktop Right / Mobile Scrollable Form) ================= */}
+      {/* ================= FORM SECTION ================= */}
       <div className="relative z-20 w-full md:w-7/12 lg:w-1/2 bg-white -mt-8 md:mt-0 rounded-t-3xl md:rounded-none px-6 py-8 sm:px-12 md:px-16 lg:px-24 xl:px-32 flex flex-col justify-center text-gray-800 shadow-[0_-15px_30px_rgba(0,0,0,0.4)] md:shadow-none h-full overflow-y-auto">
         <div className="w-full max-w-md mx-auto my-auto">
 
-          {/* Header */}
           <div className="text-center md:text-left">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
               Login
@@ -165,7 +153,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
 
             {/* Email Field */}
@@ -242,12 +229,14 @@ export default function LoginPage() {
               </a>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button with Loader & Disabled State */}
             <button
               type="submit"
-              className="mt-2 w-full rounded-xl bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] py-3.5 text-sm font-bold text-[#30230c] shadow-md transition-all hover:brightness-105 active:scale-[0.98]"
+              disabled={loading}
+              className="mt-2 w-full rounded-xl bg-gradient-to-r from-[#ffe59a] via-[#f4ca68] to-[#edbb4d] py-3.5 text-sm font-bold text-[#30230c] shadow-md transition-all hover:brightness-105 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Login
+              {loading && <Loader2 className="h-4 w-4 animate-spin text-[#30230c]" />}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
@@ -261,7 +250,6 @@ export default function LoginPage() {
 
           {/* Social Logins */}
           <div className="space-y-2.5 sm:space-y-3">
-            {/* Google */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -287,20 +275,8 @@ export default function LoginPage() {
               </svg>
               <span>Continue with Google</span>
             </button>
-
-            {/* Facebook */}
-            <button
-              type="button"
-              className="flex h-11 sm:h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-[0.99]"
-            >
-              <svg className="h-4 w-4 sm:h-5 sm:w-5 fill-[#1877F2]" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              <span>Continue with Facebook</span>
-            </button>
           </div>
 
-          {/* Sign Up Link */}
           <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-600">
             Don't have an account?{" "}
             <Link

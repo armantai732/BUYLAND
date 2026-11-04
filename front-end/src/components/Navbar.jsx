@@ -145,30 +145,6 @@ export default function Navbar() {
 
         {/* Right Actions & Auth */}
         <div className="hidden items-center gap-4 md:flex">
-          {/* Search Icon */}
-          <button
-            onClick={() => alert("Search clicked")}
-            className="rounded-full p-2 text-[#10223B] transition hover:bg-gray-100 hover:text-[#D99B26]"
-            aria-label="Search"
-          >
-            <Search size={20} />
-          </button>
-
-          {/* Divider */}
-          <div className="h-5 w-[1px] bg-gray-200" />
-
-          {/* Wishlist / Favorites */}
-          <button
-            onClick={() => navigate("/wishlist")}
-            className="relative rounded-full p-2 text-[#10223B] transition hover:bg-gray-100 hover:text-[#D99B26]"
-            aria-label="Wishlist"
-          >
-            <Heart size={20} />
-            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow">
-              2
-            </span>
-          </button>
-
           {/* Profile / Login */}
           {isLoggedIn ? (
             <button
@@ -232,13 +208,6 @@ export default function Navbar() {
             ))}
 
             <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-4">
-              <button
-                onClick={() => { navigate("/wishlist"); setMenuOpen(false); }}
-                className="flex items-center gap-2 text-sm font-semibold text-[#10223B]"
-              >
-                <Heart size={18} /> Wishlist (2)
-              </button>
-
               {isLoggedIn ? (
                 <button
                   onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}

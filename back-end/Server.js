@@ -7,6 +7,7 @@ import activitiesRouter from "./router/activityRoutes.js";
 import propertyRoutes from "./router/propertyRoutes.js";
 import dashboardRouter from "./router/dashboardRoutes.js";
 import multer from "multer";
+import wishlistRoutes from "./router/wishlistRoute.js";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/activities", activitiesRouter);
 app.use("/api/property", propertyRoutes);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/wishlist", wishlistRoutes);
 
 
 const PORT = process.env.PORT || 8080;

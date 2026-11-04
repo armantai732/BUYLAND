@@ -23,6 +23,20 @@ const authSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // CITY
+    city: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // STATE
+    state: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     password: {
       type: String,
       default: undefined,
@@ -53,11 +67,12 @@ const authSchema = new mongoose.Schema(
       enum: ["local", "google"],
       default: "local",
     },
+
     status: {
       type: String,
       enum: ["Active", "Suspended"],
       default: "Active",
-    }
+    },
   },
   { timestamps: true }
 );

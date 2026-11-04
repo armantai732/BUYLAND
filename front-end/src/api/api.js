@@ -330,18 +330,169 @@ export const getMyPropertyProfile = async () => {
 
 // GET PROPERTY DETAILS BY ID
 export const getPropertyById = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/property/${id}`);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch property details");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Get Property By ID API Error:", error);
+        throw error;
+    }
+};
+
+
+// ================= WISHLIST APIs =================
+
+// 1. Add Property to Wishlist
+export const addToWishlistAPI = async (propertyId) => {
+    try {
+        const res = await fetch(`${API_URL}/wishlist/add`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ propertyId }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Failed to add wishlist");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Add Wishlist Error:", error);
+        throw error;
+    }
+};
+
+
+// 2. Get My Wishlist
+export const getMyWishlistAPI = async () => {
+    try {
+        const res = await fetch(`${API_URL}/wishlist/my-wishlist`, {
+            method: "GET",
+            headers: getHeaders(),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Failed to fetch wishlist");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Get Wishlist Error:", error);
+        throw error;
+    }
+};
+
+
+// 3. Remove Property from Wishlist
+export const removeFromWishlistAPI = async (propertyId) => {
+    try {
+        const res = await fetch(
+            `${API_URL}/wishlist/remove/${propertyId}`,
+            {
+                method: "DELETE",
+                headers: getHeaders(),
+            }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Failed to remove wishlist");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Remove Wishlist Error:", error);
+        throw error;
+    }
+};
+
+
+// 4. Clear Complete Wishlist
+export const clearWishlistAPI = async () => {
+    try {
+        const res = await fetch(`${API_URL}/wishlist/clear`, {
+            method: "DELETE",
+            headers: getHeaders(),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Failed to clear wishlist");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Clear Wishlist Error:", error);
+        throw error;
+    }
+};
+
+
+export const changePasswordAPI = async (passwordData) => {
   try {
-    const response = await fetch(`${API_URL}/property/${id}`);
+    const res = await fetch(`${API_URL}/auth/change-password`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(passwordData),
+    });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch property details");
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to change password");
     }
 
     return data;
   } catch (error) {
-    console.error("Get Property By ID API Error:", error);
+    console.error("Change Password API Error:", error);
     throw error;
   }
+};
+
+
+export const updateMyProfileAPI = async (profileData) => {
+    const res = await fetch(`${API_URL}/auth/update-profile`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(profileData),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to update profile");
+    }
+
+    return data;
+};
+
+
+
+export const updateMyPropertyAPI = async (id, propertyData) => {
+  const res = await fetch(`${API_URL}/property/my/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(propertyData),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to update property");
+  }
+
+  return data;
 };
