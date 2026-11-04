@@ -341,7 +341,7 @@ Thank you!
 BuyLand Customer
 `;
 
-    const whatsappURL = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent(
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
       message
     )}`;
 
