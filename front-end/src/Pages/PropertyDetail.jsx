@@ -82,7 +82,7 @@ export default function PropertyDetails() {
   });
   // Fixed BuyLand Contact Number
   const contactNumber = "8401918533";
-  const whatsappNumber = "918401918533";
+  const whatsappNumber = "8401918533";
 
   // Database se property fetch
   useEffect(() => {
